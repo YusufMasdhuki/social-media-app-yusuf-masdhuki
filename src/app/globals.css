@@ -218,7 +218,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-black text-blue-500;
+    @apply bg-black text-white;
     font-family: var(--font-sf-text);
   }
 }
