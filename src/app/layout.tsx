@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import localFont from 'next/font/local';
 
+import MainLayout from '@/components/layouts/main-layout';
+
 export const sfProText = localFont({
   src: [
     { path: '../../public/fonts/SFPro/SF-Pro-Text-Regular.otf', weight: '400' },
@@ -29,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={clsx(sfProText.variable, 'antialiased')}>
-        {children}
+        <MainLayout>{children}</MainLayout>
       </body>
     </html>
   );

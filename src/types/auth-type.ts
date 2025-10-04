@@ -26,9 +26,21 @@ export interface LoginRequest {
 export interface LoginSuccessResponse {
   success: true;
   message: string;
-  data: { token: string };
+  data: {
+    token: string;
+    user: {
+      id: number;
+      name: string;
+      username: string;
+      email: string;
+      phone: string;
+      avatarUrl: string | null; // kalau bisa null pas belum upload avatar
+    };
+  };
 }
+
 export interface LoginErrorResponse {
   success: false;
   message: string;
+  errors?: Record<string, string[]>;
 }

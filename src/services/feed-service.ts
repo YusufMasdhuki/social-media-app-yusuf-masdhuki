@@ -12,7 +12,7 @@ export const getFeed = async (
   params?: GetFeedParams
 ): Promise<GetFeedSuccessResponse> => {
   try {
-    const res = await api.get<GetFeedSuccessResponse>('/feed', { params });
+    const res = await api.get<GetFeedSuccessResponse>('/api/feed', { params });
     return res.data;
   } catch (err) {
     const error = err as AxiosError<GetFeedErrorResponse>;

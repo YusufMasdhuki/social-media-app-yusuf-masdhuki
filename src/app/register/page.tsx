@@ -1,14 +1,42 @@
+'use client';
+import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
-import React from 'react';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
 
+import { FormField } from '@/components/container/FormField';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
+import { useRegister } from '@/hooks/auth/useRegister';
+import { RegisterFormValues, registerSchema } from '@/schemas/register-schema';
+import type { RegisterRequest } from '@/types/auth-type';
 
 const RegisterPage = () => {
+  const {
+    control, // ✅ ambil control
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const { mutate, isPending } = useRegister();
+
+  const onSubmit = (values: RegisterFormValues) => {
+    const payload: RegisterRequest = {
+      name: values.name,
+      username: values.username,
+      email: values.email,
+      phone: values.phone,
+      password: values.password,
+    };
+    mutate(payload);
+  };
+
   return (
     <div className='relative flex min-h-screen items-center justify-center py-30'>
       <div className='z-5 flex w-full max-w-[523px] flex-col items-center justify-center rounded-2xl border border-neutral-900 bg-black/20 px-6 py-10 backdrop-blur'>
+        {/* Logo */}
         <div className='mx-auto mb-6 flex items-center gap-3'>
           <Image
             src='/icons/logo-sociality-white.svg'
@@ -19,81 +47,77 @@ const RegisterPage = () => {
           />
           <h1 className='text-display-xs text-center font-bold'>Sociality</h1>
         </div>
+
         <p className='text-display-xs mb-6 text-center font-bold'>Register</p>
-        <form action='' className='flex w-full flex-col gap-5'>
-          <div className='flex flex-col gap-0.5'>
-            <Label htmlFor='name' className='text-sm'>
-              Name
-            </Label>
-            <Input
-              id='name'
-              type='text'
-              placeholder='Enter your name'
-              className='h-12 rounded-xl border-neutral-900'
-            />
-          </div>
-          <div className='flex flex-col gap-0.5'>
-            <Label htmlFor='username' className='text-sm'>
-              Username
-            </Label>
-            <Input
-              id='username'
-              type='text'
-              placeholder='Enter your username'
-              className='h-12 rounded-xl border-neutral-900'
-            />
-          </div>
-          <div className='flex flex-col gap-0.5'>
-            <Label htmlFor='email' className='text-sm'>
-              Email
-            </Label>
-            <Input
-              id='email'
-              type='email'
-              placeholder='Enter your email'
-              className='h-12 rounded-xl border-neutral-900'
-            />
-          </div>
-          <div className='flex flex-col gap-0.5'>
-            <Label htmlFor='number-phone' className='text-sm'>
-              Number Phone
-            </Label>
-            <Input
-              id='number-phone'
-              type='tel'
-              placeholder='Enter your number phone'
-              className='h-12 rounded-xl border-neutral-900'
-            />
-          </div>
-          <div className='flex flex-col gap-0.5'>
-            <Label htmlFor='password' className='text-sm'>
-              Password
-            </Label>
-            <Input
-              id='password'
-              type='password'
-              placeholder='Enter your password'
-              className='h-12 rounded-xl border-neutral-900'
-            />
-          </div>
-          <div className='flex flex-col gap-0.5'>
-            <Label htmlFor='confirm-password' className='text-sm'>
-              Confirm Password
-            </Label>
-            <Input
-              id='confirm-password'
-              type='password'
-              placeholder='Enter your confirm password'
-              className='h-12 rounded-xl border-neutral-900'
-            />
-          </div>
-          <Button type='submit' className='w-full'>
-            Submit
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className='flex w-full flex-col gap-5'
+        >
+          <FormField<RegisterFormValues>
+            id='name'
+            name='name'
+            control={control}
+            label='Name'
+            placeholder='Enter your name'
+            error={errors.name?.message}
+          />
+          <FormField<RegisterFormValues>
+            id='username'
+            name='username'
+            control={control}
+            label='Username'
+            placeholder='Enter your username'
+            error={errors.username?.message}
+          />
+          <FormField<RegisterFormValues>
+            id='email'
+            name='email'
+            control={control}
+            type='email'
+            label='Email'
+            placeholder='Enter your email'
+            error={errors.email?.message}
+          />
+          <FormField<RegisterFormValues>
+            id='phone'
+            name='phone'
+            control={control}
+            type='tel'
+            label='Phone Number'
+            placeholder='Enter your phone number'
+            error={errors.phone?.message}
+          />
+          <FormField<RegisterFormValues>
+            id='password'
+            name='password'
+            control={control}
+            label='Password'
+            placeholder='Enter your password'
+            error={errors.password?.message}
+            isPassword
+          />
+          <FormField<RegisterFormValues>
+            id='confirmPassword'
+            name='confirmPassword'
+            control={control}
+            label='Confirm Password'
+            placeholder='Confirm your password'
+            error={errors.confirmPassword?.message}
+            isPassword
+          />
+
+          <Button type='submit' className='w-full' disabled={isPending}>
+            {isPending ? 'Submitting...' : 'Submit'}
           </Button>
         </form>
+
         <p className='text-md mt-4 font-semibold'>
           Already have an account?
-          <span className='text-primary-200 font-bold'> Login</span>
+          <Link href='/login' className='text-primary-200 font-bold'>
+            {' '}
+            Login
+          </Link>
         </p>
       </div>
 
@@ -101,7 +125,7 @@ const RegisterPage = () => {
         <Image
           src='/images/auth-gradient.png'
           alt='auth gradient'
-          width={1440} // kasih dimensi asli gambar biar aspect ratio terjaga
+          width={1440}
           height={984}
           className='h-auto w-full object-cover object-bottom'
         />
