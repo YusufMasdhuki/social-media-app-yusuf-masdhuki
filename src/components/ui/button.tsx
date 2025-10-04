@@ -20,6 +20,7 @@ const buttonVariants = cva(
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
         link: 'hover:underline',
         text: 'hover:text-primary-200 text-white',
+        icon: 'bg-transparent',
       },
       size: {
         default: 'h-11 md:h-12 rounded-full px-3',

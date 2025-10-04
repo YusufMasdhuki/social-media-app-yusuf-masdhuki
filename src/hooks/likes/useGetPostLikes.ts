@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 
 import { getPostLikes } from '@/services/likes-service';
 import {
@@ -10,7 +10,7 @@ export const useGetPostLikes = (id: number, limit = 20) => {
   return useInfiniteQuery<
     GetPostLikesSuccessResponse, // TData
     GetPostLikesErrorResponse, // TError
-    GetPostLikesSuccessResponse, // TPage
+    InfiniteData<GetPostLikesSuccessResponse>, // TPage
     [_: string, number], // TQueryKey
     number // TPageParam (tipe pageParam)
   >({

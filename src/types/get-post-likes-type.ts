@@ -8,7 +8,11 @@ export interface UserLike {
   username: string;
   name: string;
   avatarUrl: string;
+  isFollowedByMe: boolean;
+  isMe: boolean;
+  followsMe: boolean;
 }
+
 export interface Pagination {
   page: number;
   limit: number;

@@ -34,11 +34,11 @@ const BottomNavbar = () => {
   return (
     <div
       className={clsx(
-        'fixed right-0 bottom-0 left-0 z-50 flex items-center justify-center pb-8 transition-transform duration-300',
+        'pointer-events-none fixed right-0 bottom-0 left-0 z-50 flex items-center justify-center pb-8 transition-transform duration-300',
         hidden ? 'translate-y-full' : 'translate-y-0'
       )}
     >
-      <div className='flex h-20 w-90 items-center justify-between rounded-full border border-neutral-900 bg-neutral-950 px-4'>
+      <div className='pointer-events-auto flex h-20 w-90 items-center justify-between rounded-full border border-neutral-900 bg-neutral-950 px-4'>
         {/* Home */}
         <Link
           href='/'

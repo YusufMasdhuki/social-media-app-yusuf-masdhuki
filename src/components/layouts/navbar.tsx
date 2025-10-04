@@ -97,7 +97,7 @@ const Navbar = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant='text'
-                  className='flex items-center gap-3 outline-none'
+                  className='flex items-center gap-3 px-0 outline-none'
                 >
                   <Image
                     src={
@@ -106,7 +106,7 @@ const Navbar = () => {
                     alt='avatar'
                     width={48}
                     height={48}
-                    className='size-12 rounded-full object-cover'
+                    className='aspect-square size-12 rounded-full object-cover'
                   />
                   <span className='text-md font-bold'>
                     {me.data.profile.name}

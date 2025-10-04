@@ -5,8 +5,12 @@ import { useState } from 'react';
 
 import Love from '@/components/icons/love';
 import SaveIcon from '@/components/icons/save-icon';
+import { Button } from '@/components/ui/button';
 
 import { useToggleLikePost } from '@/hooks/likes/useToggleLikePost';
+
+import { PostCommentsDialog } from '../PostCommentsDialog';
+import PostLikesDialog from '../PostLikesDialog';
 
 interface PostActionsProps {
   postId: number;
@@ -48,28 +52,51 @@ export function PostActions({
   return (
     <div className='flex items-center justify-between'>
       <div className='text-md flex items-center gap-4'>
-        <button
-          onClick={handleToggleLike}
-          disabled={toggleLikeMutation.isPending}
-          className='flex cursor-pointer items-center gap-1.5'
-        >
-          <Love
-            filled={likedByMe}
-            fillColor='red'
-            strokeColor='gray'
-            size={24}
-          />
-          <span>{likeCount}</span>
-        </button>
-
         <div className='flex items-center gap-1.5'>
-          <Image
-            src='/icons/comment-icon.svg'
-            alt='comment'
-            width={24}
-            height={24}
+          <Button
+            size='icon'
+            variant='icon'
+            onClick={handleToggleLike}
+            disabled={toggleLikeMutation.isPending}
+            className='size-6 cursor-pointer bg-transparent'
+          >
+            <Love
+              filled={likedByMe}
+              fillColor='#B41759'
+              strokeColor='#FDFDFD'
+              size={24}
+            />
+          </Button>
+          <PostLikesDialog
+            postId={postId}
+            trigger={
+              <Button
+                variant='text'
+                size='icon'
+                className='text-md w-auto font-semibold'
+              >
+                {likeCount}
+              </Button>
+            }
           />
-          <span>{commentCount}</span>
+        </div>
+
+        {/* comment */}
+        <div className='flex items-center gap-1.5'>
+          <PostCommentsDialog
+            postId={postId}
+            trigger={
+              <button className='flex items-center gap-1.5'>
+                <Image
+                  src='/icons/comment-icon.svg'
+                  alt='comment'
+                  width={24}
+                  height={24}
+                />
+                <span>{commentCount}</span>
+              </button>
+            }
+          />
         </div>
 
         <Image src='/icons/share-icon.svg' alt='share' width={24} height={24} />
