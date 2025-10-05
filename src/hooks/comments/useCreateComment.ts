@@ -49,6 +49,7 @@ export const useCreateComment = (postId: number) => {
           return { ...oldData, pages: updatedPages };
         }
       );
+      queryClient.invalidateQueries({ queryKey: ['feed'], exact: true });
     },
   });
 };

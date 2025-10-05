@@ -140,6 +140,7 @@ export const useToggleLikePost = (postId: number) => {
       queryClient.invalidateQueries({ queryKey: ['post', postId] });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['postLikes', postId] });
+      queryClient.invalidateQueries({ queryKey: ['postComments', postId] });
     },
   });
 };

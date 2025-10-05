@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 
 import { useToggleLikePost } from '@/hooks/likes/useToggleLikePost';
 
-import { PostCommentsDialog } from '../PostCommentsDialog';
 import PostLikesDialog from '../PostLikesDialog';
 
 interface PostActionsProps {
@@ -17,6 +16,7 @@ interface PostActionsProps {
   initialLiked: boolean;
   initialLikeCount: number;
   commentCount: number;
+  onCommentClick?: () => void; // opsional
 }
 
 export function PostActions({
@@ -24,6 +24,7 @@ export function PostActions({
   initialLiked,
   initialLikeCount,
   commentCount,
+  onCommentClick,
 }: PostActionsProps) {
   const [likedByMe, setLikedByMe] = useState(initialLiked);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
@@ -32,8 +33,6 @@ export function PostActions({
 
   const handleToggleLike = () => {
     const nextLiked = !likedByMe;
-
-    // Optimistic UI
     setLikedByMe(nextLiked);
     setLikeCount((prev) => (nextLiked ? prev + 1 : prev - 1));
 
@@ -41,7 +40,6 @@ export function PostActions({
       { like: nextLiked },
       {
         onError: () => {
-          // rollback kalau error
           setLikedByMe(initialLiked);
           setLikeCount(initialLikeCount);
         },
@@ -52,6 +50,7 @@ export function PostActions({
   return (
     <div className='flex items-center justify-between'>
       <div className='text-md flex items-center gap-4'>
+        {/* Like */}
         <div className='flex items-center gap-1.5'>
           <Button
             size='icon'
@@ -81,24 +80,23 @@ export function PostActions({
           />
         </div>
 
-        {/* comment */}
-        <div className='flex items-center gap-1.5'>
-          <PostCommentsDialog
-            postId={postId}
-            trigger={
-              <button className='flex items-center gap-1.5'>
-                <Image
-                  src='/icons/comment-icon.svg'
-                  alt='comment'
-                  width={24}
-                  height={24}
-                />
-                <span>{commentCount}</span>
-              </button>
-            }
+        {/* Comment */}
+        <Button
+          size='icon'
+          variant='text'
+          onClick={onCommentClick} // perilaku bisa disesuaikan
+          className='flex items-center gap-1.5'
+        >
+          <Image
+            src='/icons/comment-icon.svg'
+            alt='comment'
+            width={24}
+            height={24}
           />
-        </div>
+          <span>{commentCount}</span>
+        </Button>
 
+        {/* Share */}
         <Image src='/icons/share-icon.svg' alt='share' width={24} height={24} />
       </div>
       <SaveIcon />
