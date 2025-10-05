@@ -2,9 +2,7 @@ import axios from 'axios';
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // ❌ jangan set default Content-Type di sini
 });
 
 // Interceptor request
@@ -16,7 +14,7 @@ api.interceptors.request.use((config) => {
     }
   }
 
-  // ✅ Hanya set JSON jika bukan FormData
+  // ✅ hanya set JSON jika bukan FormData
   if (!(config.data instanceof FormData)) {
     config.headers['Content-Type'] = 'application/json';
   }

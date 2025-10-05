@@ -1,12 +1,14 @@
 'use client';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import Gallery from '@/components/container/gallery';
 import SavedGallery from '@/components/container/saved-gallery';
 import GalleryIcon from '@/components/icons/gallery-icon';
 import SaveIcon from '@/components/icons/save-icon';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { PROFILE_STATS } from '@/constants/stats-list';
@@ -15,6 +17,7 @@ import { useGetMe } from '@/hooks/my-profile/useGetMe';
 const MyProfile = () => {
   const { data, isLoading, isError, error } = useGetMe();
   const [activeTab, setActiveTab] = useState('gallery');
+  const router = useRouter();
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>{error.message}</p>;
@@ -25,17 +28,36 @@ const MyProfile = () => {
   return (
     <div className='mx-auto w-full max-w-210 px-4 py-32'>
       {/* Profile Info */}
-      <div className='flex items-center gap-5'>
-        <Image
-          src={profile.avatarUrl || '/images/default-avatar.png'}
-          alt={profile.username}
-          width={64}
-          height={64}
-          className='rounded-full object-cover'
-        />
-        <div>
-          <h1 className='text-md font-bold'>{profile.name}</h1>
-          <p className='text-md'>{profile.username}</p>
+      <div className='flex w-full items-center justify-between'>
+        <div className='flex items-center gap-5'>
+          <Image
+            src={profile.avatarUrl || '/images/default-avatar.png'}
+            alt={profile.username}
+            width={64}
+            height={64}
+            className='aspect-square rounded-full object-cover'
+          />
+          <div>
+            <h1 className='text-md font-bold'>{profile.name}</h1>
+            <p className='text-md'>{profile.username}</p>
+          </div>
+        </div>
+        <div className='flex items-center gap-3'>
+          <Button
+            variant='secondary'
+            onClick={() => router.push('/updateProfile')}
+            className='px-5.5'
+          >
+            Edit Profile
+          </Button>
+          <Button className='size-12' variant='secondary'>
+            <Image
+              src='/icons/share-icon.svg'
+              alt='share'
+              width={24}
+              height={24}
+            />
+          </Button>
         </div>
       </div>
 

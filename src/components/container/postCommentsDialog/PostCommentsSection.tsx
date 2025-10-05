@@ -63,8 +63,8 @@ export function PostCommentsSection({ post }: PostCommentsSectionProps) {
       {/* Post Actions */}
       <PostActions
         postId={post.id}
-        initialLiked={post.likedByMe}
-        initialLikeCount={post.likeCount}
+        likedByMe={post.likedByMe}
+        likeCount={post.likeCount}
         commentCount={allComments.length}
         onCommentClick={() => inputRef.current?.focus()} // fokus ke input
       />

@@ -1,5 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+'use client';
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+
+import { errorToast, successToast } from '@/lib/toast-helper';
 import { getMe, updateMe } from '@/services/my-profile-service';
 import {
   MeSuccessResponse,
@@ -11,23 +15,34 @@ import {
 
 export const useGetMe = () =>
   useQuery<MeSuccessResponse, MeErrorResponse>({
-    queryKey: ['me'], // cache key unik
-    queryFn: getMe, // function yang dipanggil
-    retry: false, // jangan retry kalau unauthorized
+    queryKey: ['me'],
+    queryFn: getMe,
+    retry: false,
   });
 
 export const useUpdateMe = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation<
-    UpdateMeSuccessResponse, // tipe sukses
-    UpdateMeErrorResponse, // tipe error
-    UpdateMeRequest // payload request
+    UpdateMeSuccessResponse,
+    UpdateMeErrorResponse,
+    UpdateMeRequest
   >({
     mutationFn: updateMe,
     onSuccess: () => {
-      // refresh cache "me" setelah update
+      // ✅ invalidate cache
       queryClient.invalidateQueries({ queryKey: ['me'] });
+
+      // ✅ tampilkan toast sukses
+      successToast('Profil berhasil diperbarui!');
+
+      // ✅ redirect ke halaman profil
+      router.push('/myProfile');
+    },
+    onError: (error) => {
+      // ✅ tampilkan toast error
+      errorToast(error.message || 'Gagal memperbarui profil');
     },
   });
 };

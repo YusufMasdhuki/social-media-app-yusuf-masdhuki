@@ -1,24 +1,35 @@
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+'use client';
 
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+
+import { errorToast, successToast } from '@/lib/toast-helper';
 import { createPost } from '@/services/posts-service';
-import {
+import type {
   CreatePostSuccessResponse,
   CreatePostErrorResponse,
   CreatePostRequest,
 } from '@/types/create-post-type';
 
 export const useCreatePost = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation<
-    CreatePostSuccessResponse, // success response
-    CreatePostErrorResponse, // error response
-    CreatePostRequest // payload
+    CreatePostSuccessResponse,
+    CreatePostErrorResponse,
+    CreatePostRequest
   >({
     mutationFn: (payload) => createPost(payload),
+
     onSuccess: () => {
-      // contoh: invalidasi cache agar daftar post ter-refresh
+      successToast('✅ Post berhasil dibuat!');
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      setTimeout(() => router.replace('/'), 800);
+    },
+
+    onError: (error) => {
+      errorToast(error.message || 'Gagal membuat post.');
     },
   });
 };

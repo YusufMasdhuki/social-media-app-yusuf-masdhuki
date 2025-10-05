@@ -31,15 +31,26 @@ export const updateMe = async (
   payload: UpdateMeRequest
 ): Promise<UpdateMeSuccessResponse> => {
   try {
+    const formData = new FormData();
+
+    if (payload.name) formData.append('name', payload.name);
+    if (payload.username) formData.append('username', payload.username);
+    if (payload.phone) formData.append('phone', payload.phone);
+    if (payload.bio !== undefined && payload.bio !== null)
+      formData.append('bio', payload.bio);
+    if (payload.avatarUrl instanceof File)
+      formData.append('avatar', payload.avatarUrl);
+
     const { data } = await api.patch<UpdateMeSuccessResponse>(
       '/api/me',
-      payload
+      formData
     );
+
     return data;
   } catch (err) {
     const error = err as AxiosError<UpdateMeErrorResponse>;
     if (error.response?.data) {
-      throw error.response.data; // error terstruktur dari API
+      throw error.response.data; // error dari API
     }
     throw {
       success: false,

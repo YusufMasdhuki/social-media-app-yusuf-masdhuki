@@ -27,8 +27,8 @@ const PostCard: React.FC<PostCardProps> = ({ item }) => {
       <PostImage src={item.imageUrl} alt={item.caption} />
       <PostActions
         postId={item.id}
-        initialLiked={item.likedByMe}
-        initialLikeCount={item.likeCount}
+        likedByMe={item.likedByMe}
+        likeCount={item.likeCount}
         commentCount={item.commentCount}
         onCommentClick={() => openPostCommentsDialog(item.id)}
       />

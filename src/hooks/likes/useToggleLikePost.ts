@@ -16,7 +16,6 @@ import type {
 
 type ToggleLikeSuccess = LikePostSuccessResponse | UnlikePostSuccessResponse;
 type ToggleLikeError = LikePostErrorResponse | UnlikePostErrorResponse;
-
 type FeedInfiniteData = InfiniteData<GetFeedSuccessResponse>;
 
 export const useToggleLikePost = (postId: number) => {
@@ -25,7 +24,7 @@ export const useToggleLikePost = (postId: number) => {
   return useMutation<
     ToggleLikeSuccess,
     ToggleLikeError,
-    { like: boolean }, // payload harus kasih state terbaru
+    { like: boolean },
     { prevPost?: GetPostByIdSuccessResponse; prevFeed?: FeedInfiniteData }
   >({
     mutationFn: ({ like }) =>
@@ -43,7 +42,6 @@ export const useToggleLikePost = (postId: number) => {
       ]);
       const prevFeed = queryClient.getQueryData<FeedInfiniteData>(['feed']);
 
-      // optimistic update post detail
       if (prevPost) {
         queryClient.setQueryData<GetPostByIdSuccessResponse>(['post', postId], {
           ...prevPost,
@@ -51,18 +49,16 @@ export const useToggleLikePost = (postId: number) => {
             ...prevPost.data,
             likedByMe: like,
             likeCount: like
-              ? prevPost.data.likeCount + 1
-              : prevPost.data.likeCount - 1,
+              ? (prevPost.data?.likeCount ?? 0) + 1
+              : (prevPost.data?.likeCount ?? 0) - 1,
           },
         });
       }
 
-      // optimistic update feed
       queryClient.setQueriesData<FeedInfiniteData>(
         { queryKey: ['feed'] },
-        (old) => {
-          if (!old) return old;
-          return {
+        (old) =>
+          old && {
             ...old,
             pages: old.pages.map((page) => ({
               ...page,
@@ -81,8 +77,7 @@ export const useToggleLikePost = (postId: number) => {
                 ),
               },
             })),
-          };
-        }
+          }
       );
 
       return { prevPost, prevFeed };
@@ -98,23 +93,20 @@ export const useToggleLikePost = (postId: number) => {
       queryClient.setQueryData<GetPostByIdSuccessResponse>(
         ['post', postId],
         (old) =>
-          old
-            ? {
-                ...old,
-                data: {
-                  ...old.data,
-                  likedByMe: data.data.liked,
-                  likeCount: data.data.likeCount,
-                },
-              }
-            : old
+          old && {
+            ...old,
+            data: {
+              ...old.data,
+              likedByMe: data.data.liked,
+              likeCount: data.data.likeCount,
+            },
+          }
       );
 
       queryClient.setQueriesData<FeedInfiniteData>(
         { queryKey: ['feed'] },
-        (old) => {
-          if (!old) return old;
-          return {
+        (old) =>
+          old && {
             ...old,
             pages: old.pages.map((page) => ({
               ...page,
@@ -131,14 +123,11 @@ export const useToggleLikePost = (postId: number) => {
                 ),
               },
             })),
-          };
-        }
+          }
       );
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['post', postId] });
-      queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['postLikes', postId] });
       queryClient.invalidateQueries({ queryKey: ['postComments', postId] });
     },

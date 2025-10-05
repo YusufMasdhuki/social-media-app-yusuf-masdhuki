@@ -20,23 +20,29 @@ export const createPost = async (
   payload: CreatePostRequest
 ): Promise<CreatePostSuccessResponse> => {
   try {
+    const formData = new FormData();
+    formData.append('image', payload.image); // File
+    formData.append('caption', payload.caption); // string
+
     const { data } = await api.post<CreatePostSuccessResponse>(
       '/api/posts',
-      payload
+      formData
     );
+
     return data;
   } catch (err) {
     const error = err as AxiosError<CreatePostErrorResponse>;
+
     if (error.response?.data) {
       throw error.response.data;
     }
+
     throw {
       success: false,
       message: error.message || 'Network error',
     } as CreatePostErrorResponse;
   }
 };
-
 export const getPostById = async (
   id: number
 ): Promise<GetPostByIdSuccessResponse> => {

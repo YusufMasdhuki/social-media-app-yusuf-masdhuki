@@ -1,6 +1,10 @@
+'use client';
+
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { useGetMe } from '@/hooks/my-profile/useGetMe';
 import { formatTime } from '@/lib/format-time';
 import type { FeedAuthor } from '@/types/feed-type';
 
@@ -14,8 +18,23 @@ export function PostHeader({ author, createdAt }: PostHeaderProps) {
     author.avatarUrl || '/images/default-avatar.png'
   );
 
+  const router = useRouter();
+  const { data: meData } = useGetMe();
+
+  const handleProfileClick = () => {
+    // kalau user yang sedang login
+    if (meData?.data.profile.username === author.username) {
+      router.push('/myProfile');
+    } else {
+      router.push(`/friendsProfile/${author.username}`);
+    }
+  };
+
   return (
-    <div className='flex items-center gap-3'>
+    <div
+      className='group flex cursor-pointer items-center gap-3'
+      onClick={handleProfileClick}
+    >
       <Image
         src={avatarSrc}
         alt={author.username || 'user avatar'}
@@ -25,7 +44,9 @@ export function PostHeader({ author, createdAt }: PostHeaderProps) {
         onError={() => setAvatarSrc('/images/default-avatar.png')}
       />
       <div>
-        <h2 className='text-md font-bold'>{author.name}</h2>
+        <h2 className='text-md group-hover:text-primary-200 font-bold transition-all duration-300 ease-out'>
+          {author.name}
+        </h2>
         <p className='text-sm text-neutral-400'>{formatTime(createdAt)}</p>
       </div>
     </div>

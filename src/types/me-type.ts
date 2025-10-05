@@ -36,7 +36,7 @@ export interface UpdateMeRequest {
   username?: string;
   phone?: string;
   bio?: string | null;
-  avatarUrl?: string | null;
+  avatarUrl?: File | null;
 }
 export interface UpdateMeSuccessResponse {
   success: true;

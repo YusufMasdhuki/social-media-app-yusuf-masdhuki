@@ -65,9 +65,12 @@ const BottomNavbar = () => {
         </Link>
 
         {/* Add Post */}
-        <div className='bg-primary-300 flex size-12 cursor-pointer items-center justify-center rounded-full'>
+        <Link
+          href='/addPost'
+          className='bg-primary-300 hover:bg-primary-400 flex size-12 cursor-pointer items-center justify-center rounded-full transition-colors'
+        >
           <Plus className='size-6 text-white' />
-        </div>
+        </Link>
 
         {/* Profile */}
         <Link

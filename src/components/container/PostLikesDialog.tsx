@@ -29,7 +29,7 @@ function PostLikesDialog({ postId, trigger }: PostLikesDialogProps) {
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
 
-      <DialogContent className='max-h-[60vh] w-full max-w-[548px] gap-0 border-none bg-transparent p-0 pt-10'>
+      <DialogContent className='max-h-[60vh] w-full max-w-[548px] gap-0 border-none bg-transparent px-4 pt-10 pb-0'>
         <div className='rounded-2xl border border-neutral-900 bg-neutral-950 p-5'>
           <DialogHeader className='mb-5'>
             <DialogTitle className='text-xl font-bold'>Likes</DialogTitle>
