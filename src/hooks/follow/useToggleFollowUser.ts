@@ -21,24 +21,24 @@ export const useToggleFollowUser = (username: string) => {
   return useMutation<
     ToggleFollowSuccess,
     ToggleFollowError,
-    { follow: boolean }, // payload wajib menyebut status baru
+    { follow: boolean },
     { prevUser?: UserDetailSuccessResponse }
   >({
     mutationFn: ({ follow }) =>
       follow ? followUser({ username }) : unfollowUser({ username }),
 
     onMutate: async ({ follow }) => {
-      await queryClient.cancelQueries({ queryKey: ['userProfile', username] });
+      await queryClient.cancelQueries({ queryKey: ['userDetail', username] });
 
       const prevUser = queryClient.getQueryData<UserDetailSuccessResponse>([
-        'userProfile',
+        'userDetail',
         username,
       ]);
 
-      // optimistic update
+      // ✅ Optimistic update
       if (prevUser) {
         queryClient.setQueryData<UserDetailSuccessResponse>(
-          ['userProfile', username],
+          ['userDetail', username],
           {
             ...prevUser,
             data: {
@@ -60,12 +60,12 @@ export const useToggleFollowUser = (username: string) => {
 
     onError: (_err, _vars, ctx) => {
       if (ctx?.prevUser)
-        queryClient.setQueryData(['userProfile', username], ctx.prevUser);
+        queryClient.setQueryData(['userDetail', username], ctx.prevUser);
     },
 
     onSuccess: (data) => {
       queryClient.setQueryData<UserDetailSuccessResponse>(
-        ['userProfile', username],
+        ['userDetail', username],
         (old) =>
           old
             ? {
@@ -86,9 +86,11 @@ export const useToggleFollowUser = (username: string) => {
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['userProfile', username] });
-      queryClient.invalidateQueries({ queryKey: ['postLikes'] });
+      // ✅ Sinkronkan ulang
+      queryClient.invalidateQueries({ queryKey: ['userDetail', username] });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['postLikes'] });
+      queryClient.invalidateQueries({ queryKey: ['postComments'] });
     },
   });
 };

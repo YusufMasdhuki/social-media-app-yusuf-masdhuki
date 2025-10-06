@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 
 import { getMyLikes } from '@/services/likes-service';
 import {
@@ -10,7 +10,7 @@ export const useGetMyLikes = (limit = 20) => {
   return useInfiniteQuery<
     GetMyLikesSuccessResponse, // TData (hasil API sukses)
     GetMyLikesErrorResponse, // TError (error dari API)
-    GetMyLikesSuccessResponse, // TPage (tiap halaman hasil)
+    InfiniteData<GetMyLikesSuccessResponse>, // TPage (tiap halaman hasil)
     ['myLikes'], // TQueryKey
     number // TPageParam (tipe pageParam)
   >({

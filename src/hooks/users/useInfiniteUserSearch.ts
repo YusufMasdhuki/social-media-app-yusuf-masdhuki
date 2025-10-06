@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 
 import { searchUsers } from '@/services/users-service';
 import {
@@ -10,7 +10,7 @@ export const useInfiniteUserSearch = (q: string, limit = 20) => {
   return useInfiniteQuery<
     UserSearchSuccessResponse, // success response type
     UserSearchErrorResponse, // error type
-    UserSearchSuccessResponse, // returned data type
+    InfiniteData<UserSearchSuccessResponse>, // returned data type
     [string, string, number], // query key
     number // pageParam type
   >({

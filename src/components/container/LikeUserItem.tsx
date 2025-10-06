@@ -4,11 +4,12 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 import { useToggleFollowUser } from '@/hooks/follow/useToggleFollowUser';
+import { UserLike } from '@/types/get-post-likes-type';
 
 import { ConfirmUnfollowDialog } from './ConfirmUnfollowDialog';
 import { Button } from '../ui/button';
 
-function LikeUserItem({ user }: { user: any }) {
+function LikeUserItem({ user }: { user: UserLike }) {
   const { mutate, isPending } = useToggleFollowUser(user.username);
   const [confirmOpen, setConfirmOpen] = useState(false);
 

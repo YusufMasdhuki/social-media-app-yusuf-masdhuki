@@ -33,6 +33,7 @@ const nextConfig = {
         hostname: 'pin.it',
         pathname: '/**',
       },
+      { protocol: 'https', hostname: 'www.pngall.com', pathname: '/**' },
     ],
   },
 };

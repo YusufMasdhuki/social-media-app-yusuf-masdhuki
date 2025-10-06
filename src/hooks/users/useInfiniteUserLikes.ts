@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 
 import { getUserLikes } from '@/services/users-service';
 import {
@@ -10,7 +10,7 @@ export const useInfiniteUserLikes = (username: string, limit = 20) => {
   return useInfiniteQuery<
     UserLikesSuccessResponse, // data success
     UserLikesErrorResponse, // error
-    UserLikesSuccessResponse, // data select (biarin sama aja)
+    InfiniteData<UserLikesSuccessResponse>, // data select (biarin sama aja)
     [string, string, number], // queryKey tuple type
     number // pageParam type ⬅️ ini kuncinya
   >({

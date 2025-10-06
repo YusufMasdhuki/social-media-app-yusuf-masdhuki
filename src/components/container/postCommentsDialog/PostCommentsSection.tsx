@@ -29,13 +29,13 @@ export function PostCommentsSection({ post }: PostCommentsSectionProps) {
   const allComments = data?.pages.flatMap((p) => p.data.comments) || [];
 
   return (
-    <div className='flex h-[calc(90vh-40px)] flex-1 flex-col bg-neutral-950 p-5'>
+    <div className='flex h-[calc(90vh-40px)] flex-1 flex-col bg-neutral-950 p-5 pr-0'>
       <ScrollArea className='h-full w-full overflow-y-auto'>
         {/* Header */}
-        <div className='flex flex-col border-b border-neutral-800 pb-5'>
+        <div className='mr-5 flex flex-col border-b border-neutral-800 pb-5'>
           <div className='flex items-center gap-3 pb-3'>
             <Image
-              src={post.author.avatarUrl}
+              src={post.author.avatarUrl || '/images/default-avatar.png'}
               alt={post.author.username}
               width={40}
               height={40}
@@ -67,6 +67,7 @@ export function PostCommentsSection({ post }: PostCommentsSectionProps) {
         likeCount={post.likeCount}
         commentCount={allComments.length}
         onCommentClick={() => inputRef.current?.focus()} // fokus ke input
+        className='pt-3 pr-5'
       />
 
       {/* Footer */}

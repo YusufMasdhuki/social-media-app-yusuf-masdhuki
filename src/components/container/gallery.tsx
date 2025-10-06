@@ -1,16 +1,22 @@
 'use client';
 
+import { Heart, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 
+import { PostCommentsDialog } from '@/components/container/postCommentsDialog/PostCommentsDialog';
+
 import { useInfiniteUserPosts } from '@/hooks/users/useInfiniteUserPosts';
+import { Post } from '@/types/get-user-post-type';
 
 const Gallery = ({ username }: { username: string }) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteUserPosts(username, 12);
 
   const { ref, inView } = useInView({ threshold: 1 });
+
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -21,10 +27,8 @@ const Gallery = ({ username }: { username: string }) => {
   if (status === 'pending') return <p>Loading posts...</p>;
   if (status === 'error') return <p>Failed to load posts.</p>;
 
-  // 🔹 gabungkan semua posts
   const posts = data?.pages.flatMap((page) => page.data.posts) ?? [];
 
-  // 🔹 kalau kosong, tampilkan fallback
   if (posts.length === 0) {
     return (
       <div className='mt-6 flex flex-col items-center justify-center gap-4 text-center'>
@@ -39,32 +43,77 @@ const Gallery = ({ username }: { username: string }) => {
     );
   }
 
-  return (
-    <div className='mt-6 grid grid-cols-3 gap-2'>
-      {posts.map(
-        (post) =>
-          post.imageUrl && (
-            <div key={post.id} className='relative aspect-square'>
-              <Image
-                src={post.imageUrl}
-                alt={post.caption || 'User post'}
-                fill
-                className='rounded-md object-cover'
-              />
-            </div>
-          )
-      )}
+  // 🔹 Normalisasi post supaya cocok dengan PostCommentsDialog
+  const normalizePost = (post: Post) => ({
+    id: post.id,
+    caption: post.caption,
+    likedByMe: post.likedByMe,
+    likeCount: post.likeCount,
+    commentCount: post.commentCount,
+    imageUrl: post.imageUrl || '/images/no-image.png',
+    createdAt: post.createdAt,
+    author: {
+      id: post.author.id,
+      username: post.author.username,
+      avatarUrl: post.author.avatarUrl || '/images/default-avatar.png',
+      name: post.author.name,
+    },
+  });
 
-      {/* infinite scroll trigger */}
-      {hasNextPage && (
-        <div
-          ref={ref}
-          className='col-span-3 flex items-center justify-center py-4'
-        >
-          {isFetchingNextPage && <p>Loading more...</p>}
-        </div>
+  return (
+    <>
+      <div className='mt-6 grid grid-cols-3 gap-2'>
+        {posts.map((post) => (
+          <div
+            key={post.id}
+            className='group relative aspect-square cursor-pointer overflow-hidden rounded-md'
+            onClick={() => setSelectedPost(post)}
+          >
+            <Image
+              src={post.imageUrl || '/images/no-image.png'}
+              alt={post.caption || 'User post'}
+              fill
+              className='object-cover transition-transform duration-300 group-hover:scale-110'
+            />
+
+            {/* Overlay hover */}
+            <div className='absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
+              <div className='flex items-center gap-4 text-white'>
+                <div className='flex items-center gap-1'>
+                  <Heart className='h-5 w-5 fill-white' />
+                  <span className='text-sm font-semibold'>
+                    {post.likeCount}
+                  </span>
+                </div>
+                <div className='flex items-center gap-1'>
+                  <MessageCircle className='h-5 w-5 fill-white' />
+                  <span className='text-sm font-semibold'>
+                    {post.commentCount}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* infinite scroll trigger */}
+        {hasNextPage && (
+          <div
+            ref={ref}
+            className='col-span-3 flex items-center justify-center py-4'
+          >
+            {isFetchingNextPage && <p>Loading more...</p>}
+          </div>
+        )}
+      </div>
+
+      {selectedPost && (
+        <PostCommentsDialog
+          post={normalizePost(selectedPost)}
+          onClose={() => setSelectedPost(null)}
+        />
       )}
-    </div>
+    </>
   );
 };
 

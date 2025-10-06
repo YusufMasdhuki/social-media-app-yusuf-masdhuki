@@ -35,7 +35,7 @@ const PostCard: React.FC<PostCardProps> = ({ item }) => {
       <PostCaption authorName={item.author.name} caption={item.caption} />
       {selectedPostId && (
         <PostCommentsDialog
-          postId={selectedPostId}
+          post={item}
           onClose={() => setSelectedPostId(null)}
         />
       )}

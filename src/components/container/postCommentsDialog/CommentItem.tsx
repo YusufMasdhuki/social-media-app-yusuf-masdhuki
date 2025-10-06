@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 
+import { formatTime } from '@/lib/format-time';
 import type { PostComment } from '@/types/get-post-comments-type';
 
 export function CommentItem({ comment }: { comment: PostComment }) {
@@ -20,7 +21,7 @@ export function CommentItem({ comment }: { comment: PostComment }) {
           {comment.text}
         </p>
         <p className='mt-1 text-xs text-neutral-500'>
-          {new Date(comment.createdAt).toLocaleString()}
+          {formatTime(comment.createdAt)}
         </p>
       </div>
     </div>

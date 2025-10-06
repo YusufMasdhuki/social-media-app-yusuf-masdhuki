@@ -29,7 +29,7 @@ export function CommentList({
   }
 
   return (
-    <div className='space-y-4 pt-5'>
+    <div className='space-y-4 pt-5 pr-5'>
       {comments.length === 0 && !isFetching && (
         <p className='text-center text-neutral-500'>No comments yet</p>
       )}

@@ -4,25 +4,45 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
+import { ConfirmUnfollowDialog } from '@/components/container/ConfirmUnfollowDialog';
 import Gallery from '@/components/container/gallery';
-import LikedGallery from '@/components/container/liked-gallery'; // 👈 buat baru mirip SavedGallery
+import LikedGallery from '@/components/container/liked-gallery';
 import GalleryIcon from '@/components/icons/gallery-icon';
-import HeartIcon from '@/components/icons/love'; // 👈 kamu bisa buat icon heart baru
+import HeartIcon from '@/components/icons/love';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+import { useToggleFollowUser } from '@/hooks/follow/useToggleFollowUser';
 import { useUserDetail } from '@/hooks/users/useUserDetail';
 
 const FriendsProfilePage = () => {
   const { username } = useParams<{ username: string }>();
   const { data, isLoading, isError, error } = useUserDetail(username);
   const [activeTab, setActiveTab] = useState('gallery');
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const toggleFollow = useToggleFollowUser(username);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>{error.message}</p>;
   if (!data) return null;
 
   const user = data.data;
+
+  const handleFollowClick = () => {
+    if (user.isFollowing) {
+      // kalau sudah following, tampilkan dialog konfirmasi
+      setConfirmOpen(true);
+    } else {
+      // langsung follow tanpa konfirmasi
+      toggleFollow.mutate({ follow: true });
+    }
+  };
+
+  const handleConfirmUnfollow = () => {
+    toggleFollow.mutate({ follow: false });
+    setConfirmOpen(false);
+  };
 
   return (
     <div className='mx-auto w-full max-w-210 px-4 py-32'>
@@ -44,18 +64,29 @@ const FriendsProfilePage = () => {
 
         {/* Actions */}
         <div className='flex items-center gap-3'>
-          {!user.isMe ? (
-            <Button
-              variant={user.isFollowing ? 'secondary' : 'default'}
-              className='px-5.5'
-            >
-              {user.isFollowing ? 'Following' : 'Follow'}
-            </Button>
-          ) : (
-            <Button variant='secondary' className='px-5.5'>
-              Edit Profile
-            </Button>
-          )}
+          <Button
+            variant={user.isFollowing ? 'secondary' : 'default'}
+            className='gap-2 px-5.5'
+            disabled={toggleFollow.isPending}
+            onClick={handleFollowClick}
+          >
+            {toggleFollow.isPending ? (
+              'Processing...'
+            ) : user.isFollowing ? (
+              <>
+                <Image
+                  src='/icons/checkbox-icon.svg'
+                  alt='Following'
+                  width={20}
+                  height={20}
+                  className='opacity-80'
+                />
+                <span>Following</span>
+              </>
+            ) : (
+              'Follow'
+            )}
+          </Button>
 
           {/* Share button */}
           <Button className='size-12' variant='secondary'>
@@ -68,6 +99,14 @@ const FriendsProfilePage = () => {
           </Button>
         </div>
       </div>
+
+      {/* Confirm Unfollow Dialog */}
+      <ConfirmUnfollowDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmUnfollow}
+        username={user.username}
+      />
 
       {/* Bio */}
       {user.bio && <p className='text-md mt-4'>{user.bio}</p>}
@@ -118,13 +157,12 @@ const FriendsProfilePage = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab content */}
         <TabsContent value='gallery'>
           <Gallery username={user.username} />
         </TabsContent>
 
         <TabsContent value='liked'>
-          <LikedGallery />
+          <LikedGallery username={user.username} />
         </TabsContent>
       </Tabs>
     </div>
