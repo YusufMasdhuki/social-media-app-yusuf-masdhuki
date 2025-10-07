@@ -1,7 +1,8 @@
 'use client';
+
 import clsx from 'clsx';
 import Image from 'next/image';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 import Love from '@/components/icons/love';
 import SaveIcon from '@/components/icons/save-icon';
@@ -20,6 +21,8 @@ interface PostActionsProps {
   username?: string;
   userPostsLimit?: number;
   onCommentClick?: () => void;
+  /** 🔥 Callback dari parent (misalnya LikedGallery) untuk update UI luar */
+  onLikeChange?: (postId: number, liked: boolean, likeCount: number) => void;
   className?: string;
 }
 
@@ -31,12 +34,12 @@ export function PostActions({
   username,
   userPostsLimit,
   onCommentClick,
+  onLikeChange,
   className,
 }: PostActionsProps) {
-  // ✅ stabilkan params biar key cache untuk saved posts tidak berubah
+  // ✅ stabilkan params agar key React Query tetap konsisten
   const savedParams = useMemo(() => ({ limit: 12 }), []);
 
-  // ✅ pasang ke useToggleLikePost (bukan object literal langsung)
   const toggleLikeMutation = useToggleLikePost(
     postId,
     username,
@@ -44,23 +47,45 @@ export function PostActions({
     savedParams
   );
 
-  const { data } = useGetPostLikes(postId, 3);
-
+  // ✅ local state untuk optimistik update
   const [likedByMe, setLikedByMe] = useState(likedByMeProp);
   const [likeCount, setLikeCount] = useState(likeCountProp);
 
-  useEffect(() => {
-    setLikedByMe(likedByMeProp);
-    setLikeCount(likeCountProp);
-  }, [likedByMeProp, likeCountProp]);
-
+  // ✅ Fungsi handle toggle like
   const handleToggleLike = () => {
     const newLiked = !likedByMe;
+    const newCount = newLiked ? likeCount + 1 : likeCount - 1;
+
+    // Optimistic UI update
     setLikedByMe(newLiked);
-    setLikeCount((prev) => (newLiked ? prev + 1 : prev - 1));
-    toggleLikeMutation.mutate({ like: newLiked });
+    setLikeCount(newCount);
+
+    // Jalankan mutation
+    toggleLikeMutation.mutate(
+      { like: newLiked },
+      {
+        onSuccess: (data) => {
+          const serverLike = data.data.liked;
+          const serverCount = data.data.likeCount;
+
+          // Koreksi data berdasarkan hasil server
+          setLikedByMe(serverLike);
+          setLikeCount(serverCount);
+
+          // ✅ Update parent UI (misalnya di LikedGallery)
+          onLikeChange?.(postId, serverLike, serverCount);
+        },
+        onError: () => {
+          // Rollback jika gagal
+          setLikedByMe(likedByMeProp);
+          setLikeCount(likeCountProp);
+        },
+      }
+    );
   };
 
+  // ✅ Ambil nama yang like untuk dialog
+  const { data } = useGetPostLikes(postId, 3);
   const likeNames = useMemo(() => {
     const users = data?.pages?.[0]?.data.users ?? [];
     if (users.length === 0) return null;
@@ -73,13 +98,8 @@ export function PostActions({
   return (
     <div className={clsx('flex flex-col', className)}>
       <div className='flex items-center justify-between'>
-        <div className='text-md flex items-center gap-4'>
-          <Button
-            size='icon'
-            variant='icon'
-            onClick={handleToggleLike}
-            className='gap-1.5'
-          >
+        <div className='flex items-center gap-4'>
+          <Button size='icon' variant='icon' onClick={handleToggleLike}>
             <Love
               filled={likedByMe}
               fillColor='#B41759'

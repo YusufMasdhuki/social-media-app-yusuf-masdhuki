@@ -20,6 +20,7 @@ interface PostCommentsDialogProps {
   onClose?: () => void;
   username?: string;
   userPostsLimit?: number;
+  onLikeChange?: (postId: number, liked: boolean, likeCount: number) => void;
 }
 
 export function PostCommentsDialog({
@@ -28,6 +29,7 @@ export function PostCommentsDialog({
   onClose,
   username,
   userPostsLimit,
+  onLikeChange,
 }: PostCommentsDialogProps) {
   if (!post) return null; // safety guard
 
@@ -51,6 +53,7 @@ export function PostCommentsDialog({
             post={post}
             username={username}
             userPostsLimit={userPostsLimit}
+            onLikeChange={onLikeChange}
           />
         </div>
       </DialogContent>

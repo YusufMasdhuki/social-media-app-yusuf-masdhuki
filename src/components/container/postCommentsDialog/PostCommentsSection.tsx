@@ -21,12 +21,14 @@ interface PostCommentsSectionProps {
   };
   username?: string;
   userPostsLimit?: number;
+  onLikeChange?: (postId: number, liked: boolean, likeCount: number) => void;
 }
 
 export function PostCommentsSection({
   post,
   username,
   userPostsLimit,
+  onLikeChange,
 }: PostCommentsSectionProps) {
   const inputRef = useRef<HTMLInputElement>(null); // ref ke input komentar
 
@@ -74,7 +76,10 @@ export function PostCommentsSection({
         commentCount={allComments.length}
         onCommentClick={() => inputRef.current?.focus()}
         username={username}
-        userPostsLimit={userPostsLimit} // ✅ penting
+        userPostsLimit={userPostsLimit}
+        onLikeChange={(postId, liked, likeCount) =>
+          onLikeChange?.(postId, liked, likeCount)
+        }
         className='pt-3 pr-5'
       />
 

@@ -1,25 +1,23 @@
+// lib/updateCacheUtils.ts
 import { InfiniteData, QueryClient } from '@tanstack/react-query';
 
 import type { FeedItem, GetFeedSuccessResponse } from '@/types/feed-type';
 import type { GetPostByIdSuccessResponse } from '@/types/get-post-detail-type';
 import type { GetSavedPostsSuccessResponse } from '@/types/get-saved-post';
+import type { UserLikesSuccessResponse } from '@/types/get-user-likes-type';
 import type { UserPostsSuccessResponse } from '@/types/get-user-post-type';
 
 type FeedInfinite = InfiniteData<GetFeedSuccessResponse>;
 type UserPostsInfinite = InfiniteData<UserPostsSuccessResponse>;
-
-/**
- * Karena pada SavedGallery kamu ubah posts-nya menjadi array of `PostDetail` (dari GetPostById),
- * maka kita representasikan seperti ini:
- */
 type SavedPostsInfinite = InfiniteData<{
   data: {
     posts: GetPostByIdSuccessResponse['data'][];
     pagination: GetSavedPostsSuccessResponse['data']['pagination'];
   };
 }>;
+type UserLikesInfinite = InfiniteData<UserLikesSuccessResponse>;
 
-// 🧠 Update single post detail
+// Update single post
 export const updateSinglePost = (
   queryClient: QueryClient,
   postId: number,
@@ -31,7 +29,7 @@ export const updateSinglePost = (
   );
 };
 
-// 🧠 Update feed cache (list utama)
+// Update feed
 export const updateFeedCache = (
   queryClient: QueryClient,
   postId: number,
@@ -55,10 +53,11 @@ export const updateFeedCache = (
   );
 };
 
-// 🧠 Update user posts cache (profile)
+// Update user posts
+// Update user posts
 export const updateUserPostsCache = (
   queryClient: QueryClient,
-  key: [string, string, number],
+  key: readonly [string, string, number], // <-- readonly
   postId: number,
   updater: (
     post: UserPostsSuccessResponse['data']['posts'][number]
@@ -82,10 +81,37 @@ export const updateUserPostsCache = (
   );
 };
 
-// 🧠 Update saved posts cache
+// Update user likes
+export const updateUserLikesCache = (
+  queryClient: QueryClient,
+  key: readonly [string, string, number], // <-- readonly
+  postId: number,
+  updater: (
+    post: UserLikesSuccessResponse['data']['posts'][number]
+  ) => UserLikesSuccessResponse['data']['posts'][number]
+) => {
+  queryClient.setQueryData<UserLikesInfinite>(key, (old) =>
+    old
+      ? {
+          ...old,
+          pages: old.pages.map((page) => ({
+            ...page,
+            data: {
+              ...page.data,
+              posts: page.data.posts.map((p) =>
+                p.id === postId ? updater(p) : p
+              ),
+            },
+          })),
+        }
+      : old
+  );
+};
+
+// Update saved posts
 export const updateSavedPostsCache = (
   queryClient: QueryClient,
-  key: [string, Record<string, any> | undefined],
+  key: readonly [string, Record<string, any> | undefined],
   postId: number,
   updater: (
     post: GetPostByIdSuccessResponse['data']
@@ -108,3 +134,5 @@ export const updateSavedPostsCache = (
       : old
   );
 };
+
+// Update user likes

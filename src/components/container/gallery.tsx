@@ -1,6 +1,6 @@
 'use client';
 
-import { Heart, MessageCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -9,6 +9,8 @@ import { PostCommentsDialog } from '@/components/container/postCommentsDialog/Po
 
 import { useInfiniteUserPosts } from '@/hooks/users/useInfiniteUserPosts';
 import { Post } from '@/types/get-user-post-type';
+
+import Love from '../icons/love';
 
 const Gallery = ({ username }: { username: string }) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
@@ -80,7 +82,11 @@ const Gallery = ({ username }: { username: string }) => {
             <div className='absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
               <div className='flex items-center gap-4 text-white'>
                 <div className='flex items-center gap-1'>
-                  <Heart className='h-5 w-5 fill-white' />
+                  <Love
+                    filled
+                    fillColor='white'
+                    className='h-5 w-5 fill-white'
+                  />
                   <span className='text-sm font-semibold'>
                     {post.likeCount}
                   </span>

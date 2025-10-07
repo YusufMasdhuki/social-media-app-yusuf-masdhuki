@@ -12,7 +12,7 @@ import {
 } from '@/types/create-comment-type';
 import { GetPostCommentsSuccessResponse } from '@/types/get-post-comments-type';
 
-export const useCreateComment = (postId: number) => {
+export const useCreateComment = (postId: number, username?: string) => {
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -21,8 +21,9 @@ export const useCreateComment = (postId: number) => {
     CreateCommentParams
   >({
     mutationFn: (body: CreateCommentParams) => createComment(postId, body),
+
     onSuccess: (data) => {
-      // 🔹 Update komentar lokal di cache usePostComments
+      // ✅ Optimistic update ke cache komentar (halaman pertama saja)
       queryClient.setQueryData<InfiniteData<GetPostCommentsSuccessResponse>>(
         ['postComments', postId],
         (oldData) => {
@@ -49,9 +50,31 @@ export const useCreateComment = (postId: number) => {
         }
       );
 
-      // 🔹 Invalidate feed dan userPosts agar sync jumlah komentar
+      // ✅ Invalidate semua cache relevan agar sinkron
       queryClient.invalidateQueries({ queryKey: ['feed'] });
-      queryClient.invalidateQueries({ queryKey: ['userPosts'] });
+      queryClient.invalidateQueries({ queryKey: ['post', postId] });
+      queryClient.invalidateQueries({
+        queryKey: ['postLikes', postId],
+      });
+      queryClient.invalidateQueries({ queryKey: ['postComments', postId] });
+      queryClient.invalidateQueries({
+        queryKey: ['savedPosts', username, { limit: 20 }],
+      });
+
+      // Kalau ada username → invalidate juga user detail & user posts
+      if (username) {
+        queryClient.invalidateQueries({
+          queryKey: ['userPosts', username, 20],
+        });
+        queryClient.invalidateQueries({ queryKey: ['userDetail', username] });
+      }
+
+      // ✅ invalidate 'me' agar komentar user muncul di profil sendiri
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+
+    onError: (error) => {
+      console.error('❌ Failed to create comment:', error);
     },
   });
 };

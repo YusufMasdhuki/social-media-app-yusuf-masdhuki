@@ -4,6 +4,7 @@ import {
   updateFeedCache,
   updateSavedPostsCache,
   updateSinglePost,
+  updateUserLikesCache,
   updateUserPostsCache,
 } from '@/lib/updateCacheUtils';
 import { likePost, unlikePost } from '@/services/likes-service';
@@ -24,14 +25,20 @@ export const useToggleLikePost = (
   savedParams?: Record<string, any>
 ) => {
   const queryClient = useQueryClient();
-  const userPostsKey: [string, string, number] | null = username
-    ? ['userPosts', username, userPostsLimit]
-    : null;
 
-  const savedPostsKey: [string, Record<string, any> | undefined] = [
-    'savedPosts',
-    savedParams,
-  ];
+  const userPostsKey = username
+    ? (['userPosts', username, userPostsLimit] as const)
+    : null;
+  const userLikesKey = username
+    ? (['userLikes', username, userPostsLimit] as const)
+    : null;
+  const savedPostsKey = ['savedPosts', savedParams] as const;
+
+  const updater = (like: boolean, item: any, serverCount?: number) => ({
+    ...item,
+    likedByMe: like,
+    likeCount: serverCount ?? (like ? item.likeCount + 1 : item.likeCount - 1),
+  });
 
   return useMutation<ToggleLikeSuccess, ToggleLikeError, { like: boolean }>({
     mutationFn: ({ like }) =>
@@ -45,73 +52,77 @@ export const useToggleLikePost = (
         userPostsKey
           ? queryClient.cancelQueries({ queryKey: userPostsKey })
           : Promise.resolve(),
+        userLikesKey
+          ? queryClient.cancelQueries({ queryKey: userLikesKey })
+          : Promise.resolve(),
       ]);
 
-      // 🧠 Optimistic update
+      // Optimistic updates
       updateSinglePost(queryClient, postId, (prev) => ({
         ...prev,
-        data: {
-          ...prev.data,
-          likedByMe: like,
-          likeCount: like ? prev.data.likeCount + 1 : prev.data.likeCount - 1,
-        },
+        data: updater(like, prev.data),
       }));
+      updateFeedCache(queryClient, postId, (item) => updater(like, item));
+      if (userPostsKey)
+        updateUserPostsCache(queryClient, userPostsKey, postId, (item) =>
+          updater(like, item)
+        );
+      updateSavedPostsCache(queryClient, savedPostsKey, postId, (item) =>
+        updater(like, item)
+      );
 
-      updateFeedCache(queryClient, postId, (item) => ({
-        ...item,
-        likedByMe: like,
-        likeCount: like ? item.likeCount + 1 : item.likeCount - 1,
-      }));
-
-      if (userPostsKey) {
-        updateUserPostsCache(queryClient, userPostsKey, postId, (p) => ({
-          ...p,
-          likedByMe: like,
-          likeCount: like ? p.likeCount + 1 : p.likeCount - 1,
-        }));
+      if (userLikesKey) {
+        if (!like) {
+          queryClient.setQueryData(userLikesKey, (old: any) => {
+            if (!old) return old;
+            return {
+              ...old,
+              pages: old.pages.map((page: any) => ({
+                ...page,
+                data: {
+                  ...page.data,
+                  posts: page.data.posts.filter((p: any) => p.id !== postId),
+                },
+              })),
+            };
+          });
+        } else {
+          updateUserLikesCache(queryClient, userLikesKey, postId, (item) =>
+            updater(like, item)
+          );
+        }
       }
-
-      updateSavedPostsCache(queryClient, savedPostsKey, postId, (p) => ({
-        ...p,
-        likedByMe: like,
-        likeCount: like ? p.likeCount + 1 : p.likeCount - 1,
-      }));
     },
 
     onSuccess: (data) => {
+      const like = data.data.liked;
+      const count = data.data.likeCount;
+      const serverUpdater = (item: any) => updater(like, item, count);
+
       updateSinglePost(queryClient, postId, (prev) => ({
         ...prev,
-        data: {
-          ...prev.data,
-          likedByMe: data.data.liked,
-          likeCount: data.data.likeCount,
-        },
+        data: serverUpdater(prev.data),
       }));
+      updateFeedCache(queryClient, postId, serverUpdater);
+      if (userPostsKey)
+        updateUserPostsCache(queryClient, userPostsKey, postId, serverUpdater);
+      updateSavedPostsCache(queryClient, savedPostsKey, postId, serverUpdater);
+      if (userLikesKey && like)
+        updateUserLikesCache(queryClient, userLikesKey, postId, serverUpdater);
 
-      updateFeedCache(queryClient, postId, (item) => ({
-        ...item,
-        likedByMe: data.data.liked,
-        likeCount: data.data.likeCount,
-      }));
-
-      if (userPostsKey) {
-        updateUserPostsCache(queryClient, userPostsKey, postId, (p) => ({
-          ...p,
-          likedByMe: data.data.liked,
-          likeCount: data.data.likeCount,
-        }));
-      }
-
-      updateSavedPostsCache(queryClient, savedPostsKey, postId, (p) => ({
-        ...p,
-        likedByMe: data.data.liked,
-        likeCount: data.data.likeCount,
-      }));
+      // ✅ invalidate me & user detail biar sinkron
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      if (username)
+        queryClient.invalidateQueries({ queryKey: ['userDetail', username] });
     },
 
     onError: () => {
       queryClient.invalidateQueries({ queryKey: ['post', postId] });
       queryClient.invalidateQueries({ queryKey: savedPostsKey });
+      if (userPostsKey)
+        queryClient.invalidateQueries({ queryKey: userPostsKey });
+      if (userLikesKey)
+        queryClient.invalidateQueries({ queryKey: userLikesKey });
     },
 
     onSettled: () => {
@@ -119,6 +130,15 @@ export const useToggleLikePost = (
       queryClient.invalidateQueries({ queryKey: ['postLikes', postId] });
       queryClient.invalidateQueries({ queryKey: ['postComments', postId] });
       queryClient.invalidateQueries({ queryKey: savedPostsKey });
+      if (userPostsKey)
+        queryClient.invalidateQueries({ queryKey: userPostsKey });
+      if (userLikesKey)
+        queryClient.invalidateQueries({ queryKey: userLikesKey });
+
+      // ✅ invalidate di akhir juga untuk jaga-jaga
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      if (username)
+        queryClient.invalidateQueries({ queryKey: ['userDetail', username] });
     },
   });
 };
