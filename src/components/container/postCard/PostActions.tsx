@@ -1,4 +1,3 @@
-// components/PostActions.tsx
 'use client';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -18,7 +17,7 @@ interface PostActionsProps {
   likedByMe: boolean;
   likeCount: number;
   commentCount: number;
-  username?: string; // optional, untuk infinite user posts
+  username?: string;
   userPostsLimit?: number;
   onCommentClick?: () => void;
   className?: string;
@@ -34,11 +33,17 @@ export function PostActions({
   onCommentClick,
   className,
 }: PostActionsProps) {
+  // ✅ stabilkan params biar key cache untuk saved posts tidak berubah
+  const savedParams = useMemo(() => ({ limit: 12 }), []);
+
+  // ✅ pasang ke useToggleLikePost (bukan object literal langsung)
   const toggleLikeMutation = useToggleLikePost(
     postId,
     username,
-    userPostsLimit
+    userPostsLimit,
+    savedParams
   );
+
   const { data } = useGetPostLikes(postId, 3);
 
   const [likedByMe, setLikedByMe] = useState(likedByMeProp);

@@ -1,8 +1,9 @@
 'use client';
 
 import { Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
+import { useInView } from 'react-intersection-observer';
 
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,17 @@ interface PostLikesDialogProps {
 function PostLikesDialog({ postId, trigger }: PostLikesDialogProps) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useGetPostLikes(postId, 20);
+
+  // 👇 Intersection Observer
+  const { ref, inView } = useInView({ threshold: 1 });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const allLikes = data?.pages.flatMap((page) => page.data.users) ?? [];
 
   return (
     <Dialog>
@@ -48,24 +60,17 @@ function PostLikesDialog({ postId, trigger }: PostLikesDialogProps) {
 
             {status === 'success' && (
               <ul className='flex w-full flex-col gap-5'>
-                {data?.pages
-                  .flatMap((page) => page.data.users)
-                  .map((user) => (
-                    <LikeUserItem key={user.id} user={user} />
-                  ))}
+                {allLikes.map((user) => (
+                  <LikeUserItem key={user.id} user={user} />
+                ))}
               </ul>
             )}
 
-            {isFetchingNextPage && (
-              <div className='flex justify-center py-2'>
-                <Loader2 className='animate-spin' />
-              </div>
-            )}
-
+            {/* infinite scroll trigger */}
             {hasNextPage && (
-              <Button onClick={() => fetchNextPage()} className='mt-4 w-full'>
-                Load More
-              </Button>
+              <div ref={ref} className='flex justify-center py-4'>
+                {isFetchingNextPage && <Loader2 className='animate-spin' />}
+              </div>
             )}
           </ScrollArea>
         </div>

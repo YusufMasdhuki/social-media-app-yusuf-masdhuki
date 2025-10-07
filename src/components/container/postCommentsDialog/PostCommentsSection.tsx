@@ -19,9 +19,15 @@ interface PostCommentsSectionProps {
     likeCount: number;
     author: { username: string; avatarUrl: string };
   };
+  username?: string;
+  userPostsLimit?: number;
 }
 
-export function PostCommentsSection({ post }: PostCommentsSectionProps) {
+export function PostCommentsSection({
+  post,
+  username,
+  userPostsLimit,
+}: PostCommentsSectionProps) {
   const inputRef = useRef<HTMLInputElement>(null); // ref ke input komentar
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
@@ -66,7 +72,9 @@ export function PostCommentsSection({ post }: PostCommentsSectionProps) {
         likedByMe={post.likedByMe}
         likeCount={post.likeCount}
         commentCount={allComments.length}
-        onCommentClick={() => inputRef.current?.focus()} // fokus ke input
+        onCommentClick={() => inputRef.current?.focus()}
+        username={username}
+        userPostsLimit={userPostsLimit} // ✅ penting
         className='pt-3 pr-5'
       />
 

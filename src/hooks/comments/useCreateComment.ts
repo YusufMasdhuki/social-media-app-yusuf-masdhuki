@@ -22,13 +22,12 @@ export const useCreateComment = (postId: number) => {
   >({
     mutationFn: (body: CreateCommentParams) => createComment(postId, body),
     onSuccess: (data) => {
-      // Ambil data lama dari useInfiniteQuery
+      // 🔹 Update komentar lokal di cache usePostComments
       queryClient.setQueryData<InfiniteData<GetPostCommentsSuccessResponse>>(
         ['postComments', postId],
         (oldData) => {
           if (!oldData) return oldData;
 
-          // update halaman pertama saja
           const updatedPages = oldData.pages.map((page, index) => {
             if (index === 0) {
               return {
@@ -49,7 +48,10 @@ export const useCreateComment = (postId: number) => {
           return { ...oldData, pages: updatedPages };
         }
       );
-      queryClient.invalidateQueries({ queryKey: ['feed'], exact: true });
+
+      // 🔹 Invalidate feed dan userPosts agar sync jumlah komentar
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['userPosts'] });
     },
   });
 };

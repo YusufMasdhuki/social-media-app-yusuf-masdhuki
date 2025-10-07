@@ -1,20 +1,20 @@
-import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, type InfiniteData } from '@tanstack/react-query';
 
 import { getPostLikes } from '@/services/likes-service';
-import {
+import type {
   GetPostLikesSuccessResponse,
   GetPostLikesErrorResponse,
 } from '@/types/get-post-likes-type';
 
 export const useGetPostLikes = (id: number, limit = 20) => {
   return useInfiniteQuery<
-    GetPostLikesSuccessResponse, // TData
-    GetPostLikesErrorResponse, // TError
-    InfiniteData<GetPostLikesSuccessResponse>, // TPage
-    [_: string, number], // TQueryKey
-    number // TPageParam (tipe pageParam)
+    GetPostLikesSuccessResponse,
+    GetPostLikesErrorResponse,
+    InfiniteData<GetPostLikesSuccessResponse>,
+    ['postLikes', number, number],
+    number
   >({
-    queryKey: ['postLikes', id],
+    queryKey: ['postLikes', id, limit],
     queryFn: ({ pageParam = 1 }) =>
       getPostLikes({ id, page: pageParam, limit }),
     initialPageParam: 1,

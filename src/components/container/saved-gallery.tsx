@@ -1,7 +1,8 @@
 'use client';
 
+import { Heart, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 import { PostCommentsDialog } from '@/components/container/postCommentsDialog/PostCommentsDialog';
@@ -9,18 +10,17 @@ import { PostCommentsDialog } from '@/components/container/postCommentsDialog/Po
 import { useGetPostById } from '@/hooks/posts/useGetPostById';
 import { useGetSavedPostsInfinite } from '@/hooks/saves/useGetSavedPostsInfinite';
 import type { FeedItem } from '@/types/feed-type';
-import { SavedPost } from '@/types/get-saved-post';
+import { PostDetail } from '@/types/get-post-detail-type';
 
 const SavedGallery = () => {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useGetSavedPostsInfinite({ limit: 12 });
 
-  const posts: SavedPost[] =
+  const posts: PostDetail[] =
     data?.pages.flatMap((page) => page.data.posts) ?? [];
 
   const { ref, inView } = useInView({ threshold: 1 });
-
-  const [selectedPost, setSelectedPost] = useState<SavedPost | null>(null);
+  const [selectedPost, setSelectedPost] = useState<PostDetail | null>(null);
 
   // Infinite scroll
   useEffect(() => {
@@ -33,6 +33,9 @@ const SavedGallery = () => {
     !!selectedPost
   );
 
+  if (status === 'pending') return <p>Loading saved posts...</p>;
+  if (status === 'error') return <p>Failed to load saved posts.</p>;
+
   if (posts.length === 0) {
     return (
       <p className='mt-6 text-center text-neutral-400'>
@@ -41,59 +44,72 @@ const SavedGallery = () => {
     );
   }
 
+  // 🔹 Normalisasi biar cocok sama PostCommentsDialog
+  const normalizePost = (post: PostDetail): FeedItem => ({
+    id: post.id,
+    caption: post.caption,
+    likedByMe: post.likedByMe,
+    likeCount: post.likeCount,
+    commentCount: post.commentCount,
+    imageUrl: post.imageUrl || '/images/no-image.png',
+    createdAt: post.createdAt,
+    author: post.author,
+  });
+
   return (
     <>
       <div className='mt-6 grid grid-cols-3 gap-2'>
-        {posts.map((post, index) => (
+        {posts.map((post) => (
           <div
-            key={`${post.id}-${index}`}
-            className='relative aspect-square cursor-pointer'
+            key={post.id}
+            className='group relative aspect-square cursor-pointer overflow-hidden rounded-md'
             onClick={() => setSelectedPost(post)}
           >
             <Image
-              src={post.imageUrl}
+              src={post.imageUrl || '/images/no-image.png'}
               alt={post.caption || 'Saved post'}
               fill
-              className='rounded-md object-cover'
+              className='object-cover transition-transform duration-300 group-hover:scale-110'
             />
+
+            {/* Overlay hover */}
+            <div className='absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
+              <div className='flex items-center gap-4 text-white'>
+                <div className='flex items-center gap-1'>
+                  <Heart className='h-5 w-5 fill-white' />
+                  <span className='text-sm font-semibold'>
+                    {post.likeCount ?? 0}
+                  </span>
+                </div>
+                <div className='flex items-center gap-1'>
+                  <MessageCircle className='h-5 w-5 fill-white' />
+                  <span className='text-sm font-semibold'>
+                    {post.commentCount ?? 0}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
 
-        {/* sentinel */}
+        {/* Infinite scroll sentinel */}
         {hasNextPage && (
           <div
             ref={ref}
-            className='col-span-3 flex justify-center py-4 text-neutral-400'
+            className='col-span-3 flex items-center justify-center py-4'
           >
-            {isFetchingNextPage
-              ? 'Loading...'
-              : 'Scroll untuk load lebih banyak'}
+            {isFetchingNextPage && <p>Loading more...</p>}
           </div>
         )}
       </div>
 
-      {/* Dialog */}
+      {/* Dialog post detail */}
       {selectedPost && (
         <PostCommentsDialog
-          post={
-            postDetailData?.data ??
-            ({
-              id: selectedPost.id,
-              imageUrl: selectedPost.imageUrl,
-              caption: selectedPost.caption,
-              createdAt: selectedPost.createdAt,
-              likedByMe: false,
-              likeCount: 0,
-              commentCount: 0,
-              author: {
-                id: 0,
-                username: 'unknown',
-                name: 'Unknown',
-                avatarUrl: '/images/default-avatar.png',
-              },
-            } as FeedItem)
-          }
+          post={postDetailData?.data ?? normalizePost(selectedPost)}
           onClose={() => setSelectedPost(null)}
+          username={postDetailData?.data?.author.username}
+          userPostsLimit={12}
         />
       )}
     </>

@@ -18,12 +18,16 @@ interface PostCommentsDialogProps {
   post?: FeedItem; // 👈 langsung pakai data feed
   trigger?: React.ReactNode;
   onClose?: () => void;
+  username?: string;
+  userPostsLimit?: number;
 }
 
 export function PostCommentsDialog({
   post,
   trigger,
   onClose,
+  username,
+  userPostsLimit,
 }: PostCommentsDialogProps) {
   if (!post) return null; // safety guard
 
@@ -43,7 +47,11 @@ export function PostCommentsDialog({
 
         <div className='pointer-events-auto flex h-[calc(90vh-40px)] max-w-[1184px] overflow-hidden rounded-2xl border border-neutral-900 bg-neutral-950'>
           <PostImageSection imageUrl={post.imageUrl} />
-          <PostCommentsSection post={post} />
+          <PostCommentsSection
+            post={post}
+            username={username}
+            userPostsLimit={userPostsLimit}
+          />
         </div>
       </DialogContent>
     </Dialog>

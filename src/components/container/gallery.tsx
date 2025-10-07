@@ -110,6 +110,8 @@ const Gallery = ({ username }: { username: string }) => {
       {selectedPost && (
         <PostCommentsDialog
           post={normalizePost(selectedPost)}
+          username={username}
+          userPostsLimit={12} // ✅ penting agar key cocok
           onClose={() => setSelectedPost(null)}
         />
       )}
