@@ -11,6 +11,7 @@ import { NavbarLogo } from '../container/navbar/NavbarLogo';
 import { NavbarSearch } from '../container/navbar/NavbarSearch';
 import { NavbarUserMenu } from '../container/navbar/NavbarUserMenu';
 import { useHideOnScroll } from '../container/navbar/useHideOnScroll';
+import { Button } from '../ui/button';
 
 export const Navbar = () => {
   const { data: me, isLoading } = useGetMe();
@@ -40,12 +41,14 @@ export const Navbar = () => {
             {/* kanan */}
             <div className='flex items-center gap-4'>
               {/* tombol search mobile */}
-              <button
-                className='md:hidden'
+              <Button
+                size='icon'
+                variant='icon'
+                className='size-5 md:hidden'
                 onClick={() => setMobileSearchOpen(true)}
               >
-                <Search className='text-neutral-25 size-6' />
-              </button>
+                <Search className='text-neutral-25 size-5' />
+              </Button>
 
               {isLoading ? (
                 <span className='text-sm text-neutral-500'>Loading...</span>
@@ -64,12 +67,11 @@ export const Navbar = () => {
         ) : (
           // jika mobileSearchOpen = true → tampilan logo + search + tombol X
           <div className='flex w-full items-center gap-4'>
-            <NavbarLogo />
             <div className='flex-1'>
               <NavbarSearch />
             </div>
             <button onClick={() => setMobileSearchOpen(false)}>
-              <X className='size-6 text-neutral-700' />
+              <X className='text-neutral-25 size-6' />
             </button>
           </div>
         )}

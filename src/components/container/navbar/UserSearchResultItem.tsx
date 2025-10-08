@@ -32,19 +32,19 @@ export const UserSearchResultItem = ({ user, onClick }: Props) => {
         }, 50);
       }}
       className={cn(
-        'flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-neutral-900'
+        'flex w-full cursor-pointer items-center gap-2 text-left transition-colors hover:bg-neutral-900'
       )}
     >
       <Image
         src={avatarSrc}
         alt={user.name}
-        width={40}
-        height={40}
-        className='h-10 w-10 rounded-full object-cover'
+        width={48}
+        height={48}
+        className='size-12 rounded-full object-cover'
       />
       <div className='flex flex-col'>
-        <span className='text-sm font-medium text-white'>{user.name}</span>
-        <span className='text-xs text-neutral-400'>@{user.username}</span>
+        <span className='text-neutral-25 text-sm font-bold'>{user.name}</span>
+        <span className='text-sm text-neutral-400'>{user.username}</span>
       </div>
     </button>
   );
