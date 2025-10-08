@@ -34,10 +34,10 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className='relative flex min-h-screen items-center justify-center py-30'>
-      <div className='z-5 flex w-full max-w-[523px] flex-col items-center justify-center rounded-2xl border border-neutral-900 bg-black/20 px-6 py-10 backdrop-blur'>
+    <div className='relative flex min-h-screen items-center justify-center px-4 py-4 md:py-30'>
+      <div className='z-5 flex w-full max-w-[523px] flex-col items-center justify-center rounded-2xl border border-neutral-900 bg-black/20 px-4 py-8 backdrop-blur md:px-6 md:py-10'>
         {/* Logo */}
-        <div className='mx-auto mb-6 flex items-center gap-3'>
+        <div className='mx-auto mb-4 flex items-center gap-3 md:mb-6'>
           <Image
             src='/icons/logo-sociality-white.svg'
             alt='logo sociality'
@@ -48,7 +48,9 @@ const RegisterPage = () => {
           <h1 className='text-display-xs text-center font-bold'>Sociality</h1>
         </div>
 
-        <p className='text-display-xs mb-6 text-center font-bold'>Register</p>
+        <p className='md:text-display-xs mb-4 text-center text-xl font-bold md:mb-6'>
+          Register
+        </p>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -112,7 +114,7 @@ const RegisterPage = () => {
           </Button>
         </form>
 
-        <p className='text-md mt-4 font-semibold'>
+        <p className='md:text-md mt-4 text-sm font-semibold'>
           Already have an account?
           <Link href='/login' className='text-primary-200 font-bold'>
             {' '}

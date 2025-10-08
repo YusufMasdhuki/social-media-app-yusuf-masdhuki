@@ -1,6 +1,8 @@
 'use client';
 
 import clsx from 'clsx';
+import { Search, X } from 'lucide-react';
+import { useState } from 'react';
 
 import { useGetMe } from '@/hooks/my-profile/useGetMe';
 
@@ -14,6 +16,8 @@ export const Navbar = () => {
   const { data: me, isLoading } = useGetMe();
   const hidden = useHideOnScroll();
 
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
   return (
     <div
       className={clsx(
@@ -22,23 +26,53 @@ export const Navbar = () => {
       )}
     >
       <div className='flex w-full max-w-300 items-center justify-between gap-4 px-4'>
-        <NavbarLogo />
-        <NavbarSearch />
+        {/* jika mobileSearchOpen = false, tampil layout normal */}
+        {!mobileSearchOpen ? (
+          <>
+            {/* kiri */}
+            <NavbarLogo />
 
-        <div className='flex items-center justify-end gap-3'>
-          {isLoading ? (
-            <span className='text-sm text-neutral-400'>Loading...</span>
-          ) : me?.success ? (
-            <NavbarUserMenu
-              name={me.data.profile.name}
-              avatarUrl={
-                me.data.profile.avatarUrl || '/images/default-avatar.png'
-              }
-            />
-          ) : (
-            <NavbarAuthButtons />
-          )}
-        </div>
+            {/* tengah (search bar hanya di desktop) */}
+            <div className='hidden w-full max-w-80 pl-8 md:block lg:max-w-125'>
+              <NavbarSearch />
+            </div>
+
+            {/* kanan */}
+            <div className='flex items-center gap-4'>
+              {/* tombol search mobile */}
+              <button
+                className='md:hidden'
+                onClick={() => setMobileSearchOpen(true)}
+              >
+                <Search className='text-neutral-25 size-6' />
+              </button>
+
+              {isLoading ? (
+                <span className='text-sm text-neutral-500'>Loading...</span>
+              ) : me?.success ? (
+                <NavbarUserMenu
+                  name={me.data.profile.name}
+                  avatarUrl={
+                    me.data.profile.avatarUrl || '/images/default-avatar.png'
+                  }
+                />
+              ) : (
+                <NavbarAuthButtons />
+              )}
+            </div>
+          </>
+        ) : (
+          // jika mobileSearchOpen = true → tampilan logo + search + tombol X
+          <div className='flex w-full items-center gap-4'>
+            <NavbarLogo />
+            <div className='flex-1'>
+              <NavbarSearch />
+            </div>
+            <button onClick={() => setMobileSearchOpen(false)}>
+              <X className='size-6 text-neutral-700' />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

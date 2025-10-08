@@ -1,5 +1,3 @@
-'use client';
-
 import Image from 'next/image';
 import { useRef } from 'react';
 
@@ -22,6 +20,7 @@ interface PostCommentsSectionProps {
   username?: string;
   userPostsLimit?: number;
   onLikeChange?: (postId: number, liked: boolean, likeCount: number) => void;
+  onSaveChange?: (postId: number, saved: boolean) => void;
 }
 
 export function PostCommentsSection({
@@ -29,17 +28,17 @@ export function PostCommentsSection({
   username,
   userPostsLimit,
   onLikeChange,
+  onSaveChange,
 }: PostCommentsSectionProps) {
-  const inputRef = useRef<HTMLInputElement>(null); // ref ke input komentar
-
+  const inputRef = useRef<HTMLInputElement>(null);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
     usePostComments(post.id);
+
   const allComments = data?.pages.flatMap((p) => p.data.comments) || [];
 
   return (
     <div className='flex h-[calc(90vh-40px)] flex-1 flex-col bg-neutral-950 p-5 pr-0'>
       <ScrollArea className='h-full w-full overflow-y-auto'>
-        {/* Header */}
         <div className='mr-5 flex flex-col border-b border-neutral-800 pb-5'>
           <div className='flex items-center gap-3 pb-3'>
             <Image
@@ -47,18 +46,15 @@ export function PostCommentsSection({
               alt={post.author.username}
               width={40}
               height={40}
-              className='aspect-square rounded-full object-cover'
+              className='h-10 w-10 rounded-full object-cover'
             />
-            <div className='flex flex-col'>
-              <span className='text-sm font-semibold'>
-                {post.author.username}
-              </span>
-            </div>
+            <span className='text-sm font-semibold'>
+              {post.author.username}
+            </span>
           </div>
           <p className='text-sm text-neutral-300'>{post.caption}</p>
         </div>
 
-        {/* Comments List */}
         <CommentList
           comments={allComments}
           fetchNextPage={fetchNextPage}
@@ -68,7 +64,6 @@ export function PostCommentsSection({
         />
       </ScrollArea>
 
-      {/* Post Actions */}
       <PostActions
         postId={post.id}
         likedByMe={post.likedByMe}
@@ -77,13 +72,11 @@ export function PostCommentsSection({
         onCommentClick={() => inputRef.current?.focus()}
         username={username}
         userPostsLimit={userPostsLimit}
-        onLikeChange={(postId, liked, likeCount) =>
-          onLikeChange?.(postId, liked, likeCount)
-        }
+        onLikeChange={onLikeChange}
+        onSaveChange={onSaveChange}
         className='pt-3 pr-5'
       />
 
-      {/* Footer */}
       <CommentInput ref={inputRef} postId={post.id} />
     </div>
   );

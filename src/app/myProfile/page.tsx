@@ -89,6 +89,7 @@ const MyProfile = () => {
           >
             <GalleryIcon className='size-6' /> <span>Gallery</span>
           </TabsTrigger>
+
           <TabsTrigger
             value='saved'
             className='text-md flex h-12 items-center gap-2 border-b border-neutral-900 text-neutral-400 data-[state=active]:border-b-3 data-[state=active]:border-white data-[state=active]:font-bold data-[state=active]:text-white'

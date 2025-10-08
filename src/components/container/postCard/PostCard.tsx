@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
+import { useSavedPosts } from '@/hooks/saves/useSavedPosts';
 import type { FeedItem } from '@/types/feed-type';
 
 import { PostActions } from './PostActions';
@@ -15,28 +16,56 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({ item }) => {
-  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+  const { isSaved } = useSavedPosts(); // Redux global saved state
 
-  const openPostCommentsDialog = (postId: number) => {
-    setSelectedPostId(postId);
-  };
+  // ✅ State lokal untuk like saja
+  const [likedByMe, setLikedByMe] = useState(item.likedByMe);
+  const [likeCount, setLikeCount] = useState(item.likeCount);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // ✅ Sync jika item dari parent berubah (misal feed query update)
+  useEffect(() => {
+    setLikedByMe(item.likedByMe);
+    setLikeCount(item.likeCount);
+  }, [item.likedByMe, item.likeCount]);
 
   return (
     <div className='flex flex-col gap-3 py-6'>
       <PostHeader author={item.author} createdAt={item.createdAt} />
       <PostImage src={item.imageUrl} alt={item.caption} />
+
       <PostActions
         postId={item.id}
-        likedByMe={item.likedByMe}
-        likeCount={item.likeCount}
+        likedByMe={likedByMe}
+        likeCount={likeCount}
         commentCount={item.commentCount}
-        onCommentClick={() => openPostCommentsDialog(item.id)}
+        onCommentClick={() => setIsDialogOpen(true)}
+        onLikeChange={(postId, liked, count) => {
+          if (postId === item.id) {
+            setLikedByMe(liked);
+            setLikeCount(count);
+          }
+        }}
       />
+
       <PostCaption authorName={item.author.name} caption={item.caption} />
-      {selectedPostId && (
+
+      {isDialogOpen && (
         <PostCommentsDialog
-          post={item}
-          onClose={() => setSelectedPostId(null)}
+          post={{
+            ...item,
+            likedByMe,
+            likeCount,
+            isSaved: isSaved(item.id), // ✅ pakai Redux
+          }}
+          onClose={() => setIsDialogOpen(false)}
+          username={item.author.username}
+          onLikeChange={(postId, liked, count) => {
+            if (postId === item.id) {
+              setLikedByMe(liked);
+              setLikeCount(count);
+            }
+          }}
         />
       )}
     </div>

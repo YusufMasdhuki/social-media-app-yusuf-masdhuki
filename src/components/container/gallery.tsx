@@ -7,6 +7,7 @@ import { useInView } from 'react-intersection-observer';
 
 import { PostCommentsDialog } from '@/components/container/postCommentsDialog/PostCommentsDialog';
 
+import { useSavedPosts } from '@/hooks/saves/useSavedPosts';
 import { useInfiniteUserPosts } from '@/hooks/users/useInfiniteUserPosts';
 import { Post } from '@/types/get-user-post-type';
 
@@ -15,23 +16,54 @@ import Love from '../icons/love';
 const Gallery = ({ username }: { username: string }) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteUserPosts(username, 12);
+  const { toggle, isSaved } = useSavedPosts();
 
   const { ref, inView } = useInView({ threshold: 1 });
 
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  // ✅ state lokal untuk posts agar bisa sinkron like & saved
+  const [postsState, setPostsState] = useState<Post[]>([]);
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
+  // ✅ sinkron state lokal saat fetch data baru
+  useEffect(() => {
+    if (data) {
+      const fetched = data.pages.flatMap((page) => page.data.posts) ?? [];
+      setPostsState(fetched);
+    }
+  }, [data]);
+
+  // ✅ infinite scroll
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // ✅ callback untuk sinkron like
+  const handleUpdatePost = (
+    postId: number,
+    liked: boolean,
+    likeCount: number
+  ) => {
+    setPostsState((prev) =>
+      prev.map((p) =>
+        p.id === postId ? { ...p, likedByMe: liked, likeCount } : p
+      )
+    );
+  };
+
+  // ✅ callback untuk sinkron save
+  const handleUpdateSave = (postId: number) => {
+    toggle(postId); // update Redux store
+
+    setPostsState((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, isSaved: !isSaved(p.id) } : p))
+    );
+  };
+
   if (status === 'pending') return <p>Loading posts...</p>;
   if (status === 'error') return <p>Failed to load posts.</p>;
-
-  const posts = data?.pages.flatMap((page) => page.data.posts) ?? [];
-
-  if (posts.length === 0) {
+  if (postsState.length === 0)
     return (
       <div className='mt-6 flex flex-col items-center justify-center gap-4 text-center'>
         <p className='text-neutral-400'>No posts yet</p>
@@ -43,17 +75,17 @@ const Gallery = ({ username }: { username: string }) => {
         </button>
       </div>
     );
-  }
 
-  // 🔹 Normalisasi post supaya cocok dengan PostCommentsDialog
+  // 🔹 normalisasi post untuk dialog
   const normalizePost = (post: Post) => ({
     id: post.id,
     caption: post.caption,
     likedByMe: post.likedByMe,
     likeCount: post.likeCount,
-    commentCount: post.commentCount,
+    commentCount: post.commentCount ?? 0,
     imageUrl: post.imageUrl || '/images/no-image.png',
     createdAt: post.createdAt,
+    isSaved: post.isSaved ?? false, // ✅ tambahkan
     author: {
       id: post.author.id,
       username: post.author.username,
@@ -62,14 +94,16 @@ const Gallery = ({ username }: { username: string }) => {
     },
   });
 
+  const selectedPost = postsState.find((p) => p.id === selectedPostId);
+
   return (
     <>
       <div className='mt-6 grid grid-cols-3 gap-2'>
-        {posts.map((post) => (
+        {postsState.map((post) => (
           <div
             key={post.id}
             className='group relative aspect-square cursor-pointer overflow-hidden rounded-md'
-            onClick={() => setSelectedPost(post)}
+            onClick={() => setSelectedPostId(post.id)}
           >
             <Image
               src={post.imageUrl || '/images/no-image.png'}
@@ -83,7 +117,7 @@ const Gallery = ({ username }: { username: string }) => {
               <div className='flex items-center gap-4 text-white'>
                 <div className='flex items-center gap-1'>
                   <Love
-                    filled
+                    filled={post.likedByMe}
                     fillColor='white'
                     className='h-5 w-5 fill-white'
                   />
@@ -102,7 +136,6 @@ const Gallery = ({ username }: { username: string }) => {
           </div>
         ))}
 
-        {/* infinite scroll trigger */}
         {hasNextPage && (
           <div
             ref={ref}
@@ -113,12 +146,14 @@ const Gallery = ({ username }: { username: string }) => {
         )}
       </div>
 
+      {/* Dialog */}
       {selectedPost && (
         <PostCommentsDialog
           post={normalizePost(selectedPost)}
           username={username}
-          userPostsLimit={12} // ✅ penting agar key cocok
-          onClose={() => setSelectedPost(null)}
+          onClose={() => setSelectedPostId(null)}
+          onLikeChange={handleUpdatePost} // ✅ sinkron like
+          onSaveChange={handleUpdateSave} // ✅ sinkron save
         />
       )}
     </>

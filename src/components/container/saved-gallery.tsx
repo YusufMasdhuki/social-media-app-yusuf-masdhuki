@@ -8,6 +8,7 @@ import { useInView } from 'react-intersection-observer';
 import { PostCommentsDialog } from '@/components/container/postCommentsDialog/PostCommentsDialog';
 
 import { useGetSavedPostsInfinite } from '@/hooks/saves/useGetSavedPostsInfinite';
+import { useSavedPosts } from '@/hooks/saves/useSavedPosts';
 import { toFeedItem } from '@/lib/adapter';
 import type { FeedItem } from '@/types/feed-type';
 
@@ -16,29 +17,29 @@ import Love from '../icons/love';
 const SavedGallery = () => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useGetSavedPostsInfinite({ limit: 12 });
+  const { toggle, isSaved } = useSavedPosts();
 
   const { ref, inView } = useInView({ threshold: 1 });
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
-  // ✅ State lokal untuk sinkron manual
   const [postsState, setPostsState] = useState<FeedItem[]>([]);
 
-  // ✅ Update postsState setiap kali data baru di-fetch
+  // Update state lokal saat data baru di-fetch
   useEffect(() => {
     if (data) {
       const fetched = data.pages.flatMap((page) => page.data.posts) ?? [];
-      const adapted = fetched.map((post) => toFeedItem(post));
+      const adapted = fetched.map(toFeedItem);
       setPostsState(adapted);
     }
   }, [data]);
 
-  // ✅ Infinite scroll
+  // Infinite scroll
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // ✅ Update state lokal saat like berubah di dialog
-  const handleUpdatePost = (
+  // Callback untuk sinkron like
+  const handleUpdateLike = (
     postId: number,
     liked: boolean,
     likeCount: number
@@ -47,6 +48,15 @@ const SavedGallery = () => {
       prev.map((p) =>
         p.id === postId ? { ...p, likedByMe: liked, likeCount } : p
       )
+    );
+  };
+
+  const handleUpdateSave = (postId: number) => {
+    toggle(postId); // update Redux global
+
+    // update state lokal agar UI langsung berubah
+    setPostsState((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, isSaved: !isSaved(p.id) } : p))
     );
   };
 
@@ -80,7 +90,7 @@ const SavedGallery = () => {
               <div className='flex items-center gap-4 text-white'>
                 <div className='flex items-center gap-1'>
                   <Love
-                    filled
+                    filled={post.likedByMe}
                     fillColor='white'
                     className='h-5 w-5 fill-white'
                   />
@@ -111,11 +121,12 @@ const SavedGallery = () => {
 
       {selectedPost && (
         <PostCommentsDialog
-          post={toFeedItem(selectedPost)}
-          onClose={() => setSelectedPostId(null)}
+          post={selectedPost}
           username={selectedPost.author.username}
           userPostsLimit={12}
-          onLikeChange={handleUpdatePost} // ✅ sinkron dengan state lokal
+          onClose={() => setSelectedPostId(null)}
+          onLikeChange={handleUpdateLike}
+          onSaveChange={handleUpdateSave} // penting untuk sinkron save
         />
       )}
     </>

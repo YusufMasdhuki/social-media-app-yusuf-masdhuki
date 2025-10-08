@@ -31,10 +31,10 @@ const LoginPage = () => {
   };
 
   return (
-    <div className='relative flex min-h-screen items-center justify-center py-30'>
-      <div className='z-5 flex w-full max-w-[523px] flex-col items-center justify-center rounded-2xl border border-neutral-900 bg-black/20 px-6 py-10 backdrop-blur'>
+    <div className='relative flex min-h-screen items-center justify-center py-20 md:py-30'>
+      <div className='z-5 flex w-full max-w-[523px] flex-col items-center justify-center rounded-2xl border border-neutral-900 bg-black/20 px-4 py-8 backdrop-blur md:px-6 md:py-10'>
         {/* Logo */}
-        <div className='mx-auto mb-6 flex items-center gap-3'>
+        <div className='mx-auto mb-4 flex items-center gap-3 md:mb-6'>
           <Image
             src='/icons/logo-sociality-white.svg'
             alt='logo sociality'
@@ -45,7 +45,7 @@ const LoginPage = () => {
           <h1 className='text-display-xs text-center font-bold'>Sociality</h1>
         </div>
 
-        <p className='text-display-xs mb-6 text-center font-bold'>
+        <p className='md:text-display-xs mb-4 text-center text-xl font-bold md:mb-6'>
           Welcome Back!
         </p>
 
@@ -76,7 +76,7 @@ const LoginPage = () => {
           </Button>
         </form>
 
-        <p className='text-md mt-4 font-semibold'>
+        <p className='md:text-md mt-4 text-sm font-semibold'>
           Don&apos;t have an account?
           <Link href='/register' className='text-primary-200 font-bold'>
             {' '}

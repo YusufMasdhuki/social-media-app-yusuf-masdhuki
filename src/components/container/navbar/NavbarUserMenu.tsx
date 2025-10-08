@@ -44,9 +44,9 @@ export const NavbarUserMenu = ({ name, avatarUrl }: Props) => {
             alt='avatar'
             width={48}
             height={48}
-            className='aspect-square size-12 rounded-full object-cover'
+            className='aspect-square size-10 rounded-full object-cover md:size-12'
           />
-          <span className='text-md font-bold'>{name}</span>
+          <span className='text-md hidden font-bold md:inline'>{name}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

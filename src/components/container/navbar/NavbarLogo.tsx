@@ -13,6 +13,6 @@ export const NavbarLogo = () => (
       height={30}
       className='size-7.5'
     />
-    <h1 className='text-display-xs font-bold'>Sociality</h1>
+    <h1 className='text-display-xs font-bold md:inline'>Sociality</h1>
   </Link>
 );

@@ -1,8 +1,6 @@
-'use client';
-
 import clsx from 'clsx';
 import Image from 'next/image';
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import Love from '@/components/icons/love';
 import SaveIcon from '@/components/icons/save-icon';
@@ -10,6 +8,8 @@ import { Button } from '@/components/ui/button';
 
 import { useGetPostLikes } from '@/hooks/likes/useGetPostLikes';
 import { useToggleLikePost } from '@/hooks/likes/useToggleLikePost';
+import { useSavedPosts } from '@/hooks/saves/useSavedPosts';
+import { useToggleSavePost } from '@/hooks/saves/useToggleSavePost';
 
 import PostLikesDialog from '../PostLikesDialog';
 
@@ -21,70 +21,64 @@ interface PostActionsProps {
   username?: string;
   userPostsLimit?: number;
   onCommentClick?: () => void;
-  /** 🔥 Callback dari parent (misalnya LikedGallery) untuk update UI luar */
   onLikeChange?: (postId: number, liked: boolean, likeCount: number) => void;
+  onSaveChange?: (postId: number, saved: boolean) => void;
   className?: string;
 }
 
 export function PostActions({
   postId,
-  likedByMe: likedByMeProp,
-  likeCount: likeCountProp,
+  likedByMe,
+  likeCount,
   commentCount,
   username,
   userPostsLimit,
+  onSaveChange,
   onCommentClick,
   onLikeChange,
   className,
 }: PostActionsProps) {
-  // ✅ stabilkan params agar key React Query tetap konsisten
-  const savedParams = useMemo(() => ({ limit: 12 }), []);
-
   const toggleLikeMutation = useToggleLikePost(
     postId,
     username,
-    userPostsLimit,
-    savedParams
+    userPostsLimit
   );
+  const toggleSaveMutation = useToggleSavePost(postId);
 
-  // ✅ local state untuk optimistik update
-  const [likedByMe, setLikedByMe] = useState(likedByMeProp);
-  const [likeCount, setLikeCount] = useState(likeCountProp);
+  const { isSaved, toggle } = useSavedPosts(); // Redux
 
-  // ✅ Fungsi handle toggle like
   const handleToggleLike = () => {
     const newLiked = !likedByMe;
     const newCount = newLiked ? likeCount + 1 : likeCount - 1;
 
-    // Optimistic UI update
-    setLikedByMe(newLiked);
-    setLikeCount(newCount);
+    onLikeChange?.(postId, newLiked, newCount);
 
-    // Jalankan mutation
     toggleLikeMutation.mutate(
       { like: newLiked },
       {
         onSuccess: (data) => {
-          const serverLike = data.data.liked;
-          const serverCount = data.data.likeCount;
-
-          // Koreksi data berdasarkan hasil server
-          setLikedByMe(serverLike);
-          setLikeCount(serverCount);
-
-          // ✅ Update parent UI (misalnya di LikedGallery)
-          onLikeChange?.(postId, serverLike, serverCount);
+          onLikeChange?.(postId, data.data.liked, data.data.likeCount);
         },
         onError: () => {
-          // Rollback jika gagal
-          setLikedByMe(likedByMeProp);
-          setLikeCount(likeCountProp);
+          onLikeChange?.(postId, likedByMe, likeCount);
         },
       }
     );
   };
 
-  // ✅ Ambil nama yang like untuk dialog
+  const handleToggleSave = () => {
+    const currentlySaved = isSaved(postId);
+
+    // update Redux
+    toggle(postId);
+
+    // callback ke parent
+    onSaveChange?.(postId, !currentlySaved);
+
+    // update server
+    toggleSaveMutation.mutate({ save: !currentlySaved });
+  };
+
   const { data } = useGetPostLikes(postId, 3);
   const likeNames = useMemo(() => {
     const users = data?.pages?.[0]?.data.users ?? [];
@@ -131,7 +125,14 @@ export function PostActions({
             height={24}
           />
         </div>
-        <SaveIcon />
+
+        <Button size='icon' variant='icon' onClick={handleToggleSave}>
+          <SaveIcon
+            filled={isSaved(postId)}
+            fillColor='#FDFDFD'
+            strokeColor='#FDFDFD'
+          />
+        </Button>
       </div>
 
       {likeNames && (

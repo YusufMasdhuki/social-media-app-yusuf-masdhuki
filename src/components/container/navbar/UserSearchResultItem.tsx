@@ -14,24 +14,33 @@ interface Props {
 export const UserSearchResultItem = ({ user, onClick }: Props) => {
   const router = useRouter();
 
+  // Pastikan avatarSrc valid untuk Next.js Image
+  const avatarSrc = user.avatarUrl
+    ? user.avatarUrl.startsWith('http')
+      ? user.avatarUrl // URL remote
+      : user.avatarUrl.startsWith('/')
+        ? user.avatarUrl // relative path sudah valid
+        : `/${user.avatarUrl}` // tambahkan slash jika kurang
+    : '/images/default-avatar.png'; // fallback lokal
+
   return (
     <button
       onClick={() => {
-        onClick?.(); // ✅ tutup dropdown
+        onClick?.(); // ✅ tutup dropdown jika ada
         setTimeout(() => {
           router.push(`/friendsProfile/${user.username}`);
         }, 50);
       }}
       className={cn(
-        'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-neutral-900'
+        'flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-neutral-900'
       )}
     >
       <Image
-        src={user.avatarUrl || '/images/default-avatar.png'}
+        src={avatarSrc}
         alt={user.name}
         width={40}
         height={40}
-        className='size-10 rounded-full object-cover'
+        className='h-10 w-10 rounded-full object-cover'
       />
       <div className='flex flex-col'>
         <span className='text-sm font-medium text-white'>{user.name}</span>

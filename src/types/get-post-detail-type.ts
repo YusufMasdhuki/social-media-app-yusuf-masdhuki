@@ -14,6 +14,7 @@ export interface PostDetail {
   likeCount: number;
   commentCount: number;
   likedByMe: boolean;
+  isSaved?: boolean;
 }
 
 export interface GetPostByIdSuccessResponse {

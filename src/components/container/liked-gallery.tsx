@@ -2,9 +2,10 @@
 
 import { MessageCircle } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
 
+import { useSavedPosts } from '@/hooks/saves/useSavedPosts';
 import { useInfiniteUserLikes } from '@/hooks/users/useInfiniteUserLikes';
 import { toFeedItem } from '@/lib/adapter';
 import type { FeedItem } from '@/types/feed-type';
@@ -15,19 +16,19 @@ import { PostCommentsDialog } from './postCommentsDialog/PostCommentsDialog';
 const LikedGallery = ({ username }: { username: string }) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteUserLikes(username, 12);
+  const { toggle } = useSavedPosts();
 
   const { ref, inView } = useInView({ threshold: 1 });
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
-  // ✅ State lokal agar bisa disinkronkan manual
+  // ✅ State lokal untuk sinkron like & save
   const [postsState, setPostsState] = useState<FeedItem[]>([]);
 
-  // Update postsState setiap kali data baru di-fetch
+  // Sinkron postsState setiap kali data baru datang
   useEffect(() => {
     if (data) {
       const fetched = data.pages.flatMap((page) => page.data.posts) ?? [];
-      // ✅ adapt ke FeedItem agar imageUrl selalu string, bukan null
-      const adapted = fetched.map((post) => toFeedItem(post));
+      const adapted = fetched.map(toFeedItem);
       setPostsState(adapted);
     }
   }, [data]);
@@ -37,18 +38,31 @@ const LikedGallery = ({ username }: { username: string }) => {
     if (inView && hasNextPage && !isFetchingNextPage) fetchNextPage();
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Handle update post dari dialog
-  const handleUpdatePost = (
-    postId: number,
-    liked: boolean,
-    likeCount: number
-  ) => {
-    setPostsState((prev) =>
-      prev.map((p) =>
-        p.id === postId ? { ...p, likedByMe: liked, likeCount } : p
-      )
-    );
-  };
+  // Callback untuk update like
+  const handleUpdateLike = useCallback(
+    (postId: number, liked: boolean, likeCount: number) => {
+      setPostsState((prev) =>
+        prev.map((p) =>
+          p.id === postId ? { ...p, likedByMe: liked, likeCount } : p
+        )
+      );
+    },
+    []
+  );
+
+  // Callback untuk update save
+  const handleUpdateSave = useCallback(
+    (postId: number, saved: boolean) => {
+      // update Redux global
+      toggle(postId);
+
+      // update state lokal
+      setPostsState((prev) =>
+        prev.map((p) => (p.id === postId ? { ...p, isSaved: saved } : p))
+      );
+    },
+    [toggle]
+  );
 
   if (status === 'pending') return <p>Loading liked posts...</p>;
   if (status === 'error') return <p>Failed to load liked posts.</p>;
@@ -75,11 +89,12 @@ const LikedGallery = ({ username }: { username: string }) => {
               className='object-cover transition-transform duration-300 group-hover:scale-110'
             />
 
+            {/* Overlay hover */}
             <div className='absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100'>
               <div className='flex items-center gap-4 text-white'>
                 <div className='flex items-center gap-1'>
                   <Love
-                    filled
+                    filled={post.likedByMe}
                     fillColor='white'
                     className='h-5 w-5 fill-white'
                   />
@@ -108,13 +123,15 @@ const LikedGallery = ({ username }: { username: string }) => {
         )}
       </div>
 
+      {/* Post Comments Dialog */}
       {selectedPost && (
         <PostCommentsDialog
-          post={toFeedItem(selectedPost)}
-          onClose={() => setSelectedPostId(null)}
+          post={selectedPost}
           username={selectedPost.author.username}
           userPostsLimit={12}
-          onLikeChange={handleUpdatePost} // ✅ kirim callback ke dialog
+          onClose={() => setSelectedPostId(null)}
+          onLikeChange={handleUpdateLike}
+          onSaveChange={handleUpdateSave}
         />
       )}
     </>

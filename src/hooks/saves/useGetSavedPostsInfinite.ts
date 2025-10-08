@@ -22,7 +22,6 @@ export const useGetSavedPostsInfinite = (
   const queryClient = useQueryClient();
 
   return useInfiniteQuery<
-    // ✅ hasil queryFn (sudah enriched dengan PostDetail[])
     GetSavedPostsSuccessResponse & { data: { posts: PostDetail[] } },
     GetSavedPostsErrorResponse,
     InfiniteData<
@@ -39,11 +38,24 @@ export const useGetSavedPostsInfinite = (
         saved.data.posts.map(async (post) => {
           try {
             const detail = await getPostById(post.id);
+
+            // ✅ pastikan setiap post di savedPosts punya isSaved = true
+            const enriched = {
+              ...detail.data,
+              isSaved: true,
+            } satisfies PostDetail;
+
+            // simpan ke cache detail
             queryClient.setQueryData<GetPostByIdSuccessResponse>(
               ['post', post.id],
-              detail
+              {
+                success: true,
+                message: 'OK',
+                data: enriched,
+              }
             );
-            return detail.data;
+
+            return enriched;
           } catch {
             return {
               id: post.id,
@@ -59,6 +71,7 @@ export const useGetSavedPostsInfinite = (
               likeCount: 0,
               commentCount: 0,
               likedByMe: false,
+              isSaved: true, // ✅ fallback tetap true
             } satisfies PostDetail;
           }
         })

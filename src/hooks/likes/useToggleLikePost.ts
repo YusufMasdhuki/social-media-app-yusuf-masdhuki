@@ -48,6 +48,7 @@ export const useToggleLikePost = (
       await Promise.all([
         queryClient.cancelQueries({ queryKey: ['post', postId] }),
         queryClient.cancelQueries({ queryKey: ['feed'] }),
+
         queryClient.cancelQueries({ queryKey: savedPostsKey }),
         userPostsKey
           ? queryClient.cancelQueries({ queryKey: userPostsKey })
@@ -129,6 +130,7 @@ export const useToggleLikePost = (
       queryClient.invalidateQueries({ queryKey: ['post', postId] });
       queryClient.invalidateQueries({ queryKey: ['postLikes', postId] });
       queryClient.invalidateQueries({ queryKey: ['postComments', postId] });
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: savedPostsKey });
       if (userPostsKey)
         queryClient.invalidateQueries({ queryKey: userPostsKey });

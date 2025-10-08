@@ -35,26 +35,20 @@ export const updateFeedCache = (
   postId: number,
   updater: (item: FeedItem) => FeedItem
 ) => {
-  queryClient.setQueryData<FeedInfinite>(['feed'], (old) =>
-    old
-      ? {
-          ...old,
-          pages: old.pages.map((page) => ({
-            ...page,
-            data: {
-              ...page.data,
-              items: page.data.items.map((item) =>
-                item.id === postId ? updater(item) : item
-              ),
-            },
-          })),
-        }
-      : old
-  );
+  queryClient.setQueryData<FeedInfinite>(['feed'], (old) => {
+    if (!old) return old;
+
+    const newPages = old.pages.map((page) => {
+      const newItems = page.data.items.map((item) =>
+        item.id === postId ? updater(item) : item
+      );
+      return { ...page, data: { ...page.data, items: newItems } };
+    });
+
+    return { ...old, pages: newPages };
+  });
 };
 
-// Update user posts
-// Update user posts
 export const updateUserPostsCache = (
   queryClient: QueryClient,
   key: readonly [string, string, number], // <-- readonly

@@ -11,6 +11,7 @@ export interface Post {
   };
   likeCount: number;
   commentCount: number;
+  isSaved?: boolean;
   likedByMe: boolean;
 }
 

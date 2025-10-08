@@ -1,5 +1,3 @@
-'use client';
-
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 import {
@@ -9,18 +7,20 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
+import { useSavedPosts } from '@/hooks/saves/useSavedPosts';
 import type { FeedItem } from '@/types/feed-type';
 
 import { PostCommentsSection } from './PostCommentsSection';
 import { PostImageSection } from './PostImageSection';
 
 interface PostCommentsDialogProps {
-  post?: FeedItem; // 👈 langsung pakai data feed
+  post?: FeedItem;
   trigger?: React.ReactNode;
   onClose?: () => void;
   username?: string;
   userPostsLimit?: number;
   onLikeChange?: (postId: number, liked: boolean, likeCount: number) => void;
+  onSaveChange?: (postId: number, saved: boolean) => void;
 }
 
 export function PostCommentsDialog({
@@ -30,14 +30,14 @@ export function PostCommentsDialog({
   username,
   userPostsLimit,
   onLikeChange,
+  onSaveChange,
 }: PostCommentsDialogProps) {
-  if (!post) return null; // safety guard
+  const { toggle } = useSavedPosts();
+  if (!post) return null;
 
   return (
     <Dialog
-      onOpenChange={(open) => {
-        if (!open) onClose?.();
-      }}
+      onOpenChange={(open) => !open && onClose?.()}
       open={!!trigger ? undefined : true}
     >
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
@@ -54,6 +54,10 @@ export function PostCommentsDialog({
             username={username}
             userPostsLimit={userPostsLimit}
             onLikeChange={onLikeChange}
+            onSaveChange={(postId, saved) => {
+              toggle(postId); // update Redux
+              onSaveChange?.(postId, saved); // sinkron ke state lokal parent
+            }}
           />
         </div>
       </DialogContent>

@@ -13,6 +13,7 @@ export interface FeedItem {
   likeCount: number;
   commentCount: number;
   likedByMe: boolean;
+  isSaved?: boolean;
 }
 export interface FeedPagination {
   page: number;
