@@ -21,10 +21,8 @@ const LikedGallery = ({ username }: { username: string }) => {
   const { ref, inView } = useInView({ threshold: 1 });
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
-  // ✅ State lokal untuk sinkron like & save
   const [postsState, setPostsState] = useState<FeedItem[]>([]);
 
-  // Sinkron postsState setiap kali data baru datang
   useEffect(() => {
     if (data) {
       const fetched = data.pages.flatMap((page) => page.data.posts) ?? [];

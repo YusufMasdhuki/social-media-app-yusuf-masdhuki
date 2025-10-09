@@ -34,19 +34,19 @@ const BottomNavbar = () => {
   return (
     <div
       className={clsx(
-        'pointer-events-none fixed right-0 bottom-0 left-0 z-50 flex items-center justify-center pb-8 transition-transform duration-300',
+        'pointer-events-none fixed right-0 bottom-0 left-0 z-50 flex items-center justify-center px-6 pb-4 transition-transform duration-300 md:pb-8',
         hidden ? 'translate-y-full' : 'translate-y-0'
       )}
     >
-      <div className='pointer-events-auto flex h-20 w-90 items-center justify-between rounded-full border border-neutral-900 bg-neutral-950 px-4'>
+      <div className='pointer-events-auto flex h-16 w-full max-w-90 items-center justify-between rounded-full border border-neutral-900 bg-neutral-950 px-4 md:h-20'>
         {/* Home */}
         <Link
           href='/'
-          className='group flex w-23.5 flex-col items-center gap-1'
+          className='group flex w-23.5 flex-col items-center gap-0.5 md:gap-1'
         >
           <HomeIcon
             className={clsx(
-              'size-6 transition-all duration-300 ease-out',
+              'size-5 transition-all duration-300 ease-out md:size-6',
               pathname === '/'
                 ? 'text-primary-200'
                 : 'group-hover:text-primary-100 text-white'
@@ -54,7 +54,7 @@ const BottomNavbar = () => {
           />
           <p
             className={clsx(
-              'text-md transition-all duration-300 ease-out',
+              'md:text-md text-xs transition-all duration-300 ease-out',
               pathname === '/'
                 ? 'text-primary-200'
                 : 'group-hover:text-primary-100 text-white'
@@ -67,19 +67,19 @@ const BottomNavbar = () => {
         {/* Add Post */}
         <Link
           href='/addPost'
-          className='bg-primary-300 hover:bg-primary-400 flex size-12 cursor-pointer items-center justify-center rounded-full transition-colors'
+          className='bg-primary-300 hover:bg-primary-400 flex size-11 cursor-pointer items-center justify-center rounded-full transition-colors md:size-12'
         >
-          <Plus className='size-6 text-white' />
+          <Plus className='size-5.5 text-white md:size-6' />
         </Link>
 
         {/* Profile */}
         <Link
           href='/myProfile'
-          className='group flex w-23.5 flex-col items-center gap-1'
+          className='group flex w-23.5 flex-col items-center gap-0.5 md:gap-1'
         >
           <ProfileIcon
             className={clsx(
-              'size-6 transition-all duration-300 ease-out',
+              'size-5 transition-all duration-300 ease-out md:size-6',
               pathname === '/myProfile'
                 ? 'text-primary-200'
                 : 'group-hover:text-primary-100 text-white'
@@ -87,7 +87,7 @@ const BottomNavbar = () => {
           />
           <p
             className={clsx(
-              'text-md transition-all duration-300 ease-out',
+              'md:text-md text-xs transition-all duration-300 ease-out',
               pathname === '/myProfile'
                 ? 'text-primary-200'
                 : 'group-hover:text-primary-100 text-white'

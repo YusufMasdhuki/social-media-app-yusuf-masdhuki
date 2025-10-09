@@ -52,11 +52,13 @@ const SavedGallery = () => {
   };
 
   const handleUpdateSave = (postId: number) => {
-    toggle(postId); // update Redux global
+    const saved = isSaved(postId);
+    toggle(postId);
 
-    // update state lokal agar UI langsung berubah
     setPostsState((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, isSaved: !isSaved(p.id) } : p))
+      saved
+        ? prev.filter((p) => p.id !== postId) // jika sebelumnya disimpan → hapus
+        : prev.map((p) => (p.id === postId ? { ...p, isSaved: true } : p))
     );
   };
 

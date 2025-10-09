@@ -51,7 +51,7 @@ export default function Home() {
     return <p>Error: {(error as GetFeedErrorResponse).message}</p>;
 
   return (
-    <div className='mx-auto min-h-screen w-full max-w-158 px-4 pt-26 pb-32'>
+    <div className='mx-auto min-h-screen w-full max-w-158 px-4 pt-16 pb-32 md:pt-26'>
       <div className='flex flex-col divide-y divide-neutral-900'>
         {data?.pages
           .flatMap((page) => page.data.items)

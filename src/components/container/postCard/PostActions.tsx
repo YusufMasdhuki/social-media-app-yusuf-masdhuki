@@ -92,7 +92,7 @@ export function PostActions({
   return (
     <div className={clsx('flex flex-col', className)}>
       <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-4'>
+        <div className='flex items-center gap-3 md:gap-4'>
           <Button size='icon' variant='icon' onClick={handleToggleLike}>
             <Love
               filled={likedByMe}
@@ -100,7 +100,9 @@ export function PostActions({
               strokeColor='#FDFDFD'
               size={24}
             />
-            <span className='text-md font-semibold'>{likeCount}</span>
+            <span className='md:text-md text-sm font-semibold'>
+              {likeCount}
+            </span>
           </Button>
 
           <Button
@@ -115,7 +117,9 @@ export function PostActions({
               width={24}
               height={24}
             />
-            <span>{commentCount}</span>
+            <span className='md:text-md text-sm font-semibold'>
+              {commentCount}
+            </span>
           </Button>
 
           <Image
@@ -139,13 +143,9 @@ export function PostActions({
         <PostLikesDialog
           postId={postId}
           trigger={
-            <Button
-              variant='text'
-              type='button'
-              className='!h-7 !w-auto max-w-max justify-start px-0 text-sm font-medium'
-            >
+            <div className='hover:text-primary-200 max-w-max cursor-pointer justify-start px-0 text-sm font-medium transition-all duration-300 ease-out'>
               {likeNames}
-            </Button>
+            </div>
           }
         />
       )}

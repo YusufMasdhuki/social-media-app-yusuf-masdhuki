@@ -18,7 +18,7 @@ export function PostImage({ src, alt }: PostImageProps) {
       height={600}
       src={imgSrc}
       alt={alt}
-      className='max-h-[80vh] w-full rounded-md object-contain'
+      className='max-h-[90vh] w-full rounded-md object-contain md:max-h-[80vh]'
       onError={() => {
         if (imgSrc !== '/images/no-image.jpg') {
           setImgSrc('/images/no-image.png');

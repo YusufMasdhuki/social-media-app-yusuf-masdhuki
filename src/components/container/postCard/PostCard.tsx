@@ -30,7 +30,7 @@ const PostCard: React.FC<PostCardProps> = ({ item }) => {
   }, [item.likedByMe, item.likeCount]);
 
   return (
-    <div className='flex flex-col gap-3 py-6'>
+    <div className='flex flex-col gap-2 py-4 md:gap-3 md:py-6'>
       <PostHeader author={item.author} createdAt={item.createdAt} />
       <PostImage src={item.imageUrl} alt={item.caption} />
 

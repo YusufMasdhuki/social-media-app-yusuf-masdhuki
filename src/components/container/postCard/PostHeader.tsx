@@ -32,7 +32,7 @@ export function PostHeader({ author, createdAt }: PostHeaderProps) {
 
   return (
     <div
-      className='group flex cursor-pointer items-center gap-3'
+      className='group flex cursor-pointer items-center gap-2 md:gap-3'
       onClick={handleProfileClick}
     >
       <Image
@@ -40,14 +40,16 @@ export function PostHeader({ author, createdAt }: PostHeaderProps) {
         alt={author.username || 'user avatar'}
         width={64}
         height={64}
-        className='aspect-square size-16 rounded-full object-cover'
+        className='aspect-square size-11 rounded-full object-cover md:size-16'
         onError={() => setAvatarSrc('/images/default-avatar.png')}
       />
       <div>
-        <h2 className='text-md group-hover:text-primary-200 font-bold transition-all duration-300 ease-out'>
+        <h2 className='md:text-md text-neutral-25 group-hover:text-primary-200 text-sm font-bold transition-all duration-300 ease-out'>
           {author.name}
         </h2>
-        <p className='text-sm text-neutral-400'>{formatTime(createdAt)}</p>
+        <p className='text-xs text-neutral-400 md:text-sm'>
+          {formatTime(createdAt)}
+        </p>
       </div>
     </div>
   );
