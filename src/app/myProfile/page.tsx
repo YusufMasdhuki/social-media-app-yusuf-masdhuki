@@ -4,13 +4,10 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import Gallery from '@/components/container/gallery';
-import SavedGallery from '@/components/container/saved-gallery';
-import GalleryIcon from '@/components/icons/gallery-icon';
-import SaveIcon from '@/components/icons/save-icon';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+import PROFILE_TABS from '@/constants/my-profile-tabs';
 import { PROFILE_STATS } from '@/constants/stats-list';
 import { useGetMe } from '@/hooks/my-profile/useGetMe';
 
@@ -26,10 +23,10 @@ const MyProfile = () => {
   const { profile, stats } = data.data;
 
   return (
-    <div className='mx-auto w-full max-w-210 px-4 py-32'>
+    <div className='text-neutral-25 mx-auto w-full max-w-210 px-4 py-20 md:py-30'>
       {/* Profile Info */}
-      <div className='flex w-full items-center justify-between'>
-        <div className='flex items-center gap-5'>
+      <div className='flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between'>
+        <div className='flex items-center gap-3 md:gap-5'>
           <Image
             src={profile.avatarUrl || '/images/default-avatar.png'}
             alt={profile.username}
@@ -38,19 +35,19 @@ const MyProfile = () => {
             className='aspect-square rounded-full object-cover'
           />
           <div>
-            <h1 className='text-md font-bold'>{profile.name}</h1>
-            <p className='text-md'>{profile.username}</p>
+            <h1 className='md:text-md text-sm font-bold'>{profile.name}</h1>
+            <p className='md:text-md text-sm'>{profile.username}</p>
           </div>
         </div>
         <div className='flex items-center gap-3'>
           <Button
             variant='secondary'
             onClick={() => router.push('/updateProfile')}
-            className='px-5.5'
+            className='h-10 px-5.5 max-md:w-full md:h-12'
           >
             Edit Profile
           </Button>
-          <Button className='size-12' variant='secondary'>
+          <Button className='size-10 md:size-12' variant='secondary'>
             <Image
               src='/icons/share-icon.svg'
               alt='share'
@@ -61,7 +58,7 @@ const MyProfile = () => {
         </div>
       </div>
 
-      <p className='text-md mt-4'>{profile.bio}</p>
+      {profile.bio && <p className='md:text-md mt-4 text-sm'>{profile.bio}</p>}
 
       {/* Stats */}
       <div className='mt-4 flex w-full divide-x divide-neutral-900'>
@@ -70,8 +67,12 @@ const MyProfile = () => {
             key={item.key}
             className='flex w-full flex-col items-center justify-center'
           >
-            <span className='text-xl font-bold'>{stats[item.key]}</span>
-            <span className='text-md text-neutral-400'>{item.label}</span>
+            <span className='text-lg font-bold md:text-xl'>
+              {stats[item.key]}
+            </span>
+            <span className='md:text-md text-xs text-neutral-400'>
+              {item.label}
+            </span>
           </div>
         ))}
       </div>
@@ -80,36 +81,26 @@ const MyProfile = () => {
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
-        className='mt-8 w-full'
+        className='mt-4 w-full md:mt-8'
       >
         <TabsList className='grid w-full grid-cols-2'>
-          <TabsTrigger
-            value='gallery'
-            className='text-md h-12 border-b border-neutral-900 text-neutral-400 data-[state=active]:border-b-3 data-[state=active]:border-white data-[state=active]:font-bold data-[state=active]:text-white'
-          >
-            <GalleryIcon className='size-6' /> <span>Gallery</span>
-          </TabsTrigger>
-
-          <TabsTrigger
-            value='saved'
-            className='text-md flex h-12 items-center gap-2 border-b border-neutral-900 text-neutral-400 data-[state=active]:border-b-3 data-[state=active]:border-white data-[state=active]:font-bold data-[state=active]:text-white'
-          >
-            <SaveIcon
-              filled={activeTab === 'saved'}
-              strokeColor={activeTab === 'saved' ? '#FFFFFF' : '#A4A7Ae'} // neutral-400
-              fillColor='#FFFFFF'
-              className='size-6'
-            />
-            <span>Saved</span>
-          </TabsTrigger>
+          {PROFILE_TABS.map((tab) => (
+            <TabsTrigger
+              key={tab.key}
+              value={tab.key}
+              className='md:text-md flex h-12 items-center gap-2 border-b border-neutral-900 text-sm text-neutral-400 data-[state=active]:border-b-3 data-[state=active]:border-white data-[state=active]:font-bold data-[state=active]:text-white'
+            >
+              {tab.icon(activeTab === tab.key)}
+              <span>{tab.label}</span>
+            </TabsTrigger>
+          ))}
         </TabsList>
-        <TabsContent value='gallery'>
-          <Gallery username={profile.username} />
-        </TabsContent>
 
-        <TabsContent value='saved'>
-          <SavedGallery />
-        </TabsContent>
+        {PROFILE_TABS.map((tab) => (
+          <TabsContent key={tab.key} value={tab.key}>
+            {tab.content(profile.username)}
+          </TabsContent>
+        ))}
       </Tabs>
     </div>
   );

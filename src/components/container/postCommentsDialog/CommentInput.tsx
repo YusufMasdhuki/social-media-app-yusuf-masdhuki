@@ -57,7 +57,7 @@ export const CommentInput = forwardRef<HTMLInputElement, CommentInputProps>(
     };
 
     return (
-      <div className='relative flex items-center gap-2 border-t border-neutral-800 p-4 pt-3 pl-0'>
+      <div className='relative mr-5 flex items-center gap-2 pt-3 max-md:border-t max-md:border-neutral-800 md:pt-4'>
         {/* Tombol emoji */}
         <Button
           size='icon'
@@ -98,9 +98,9 @@ export const CommentInput = forwardRef<HTMLInputElement, CommentInputProps>(
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 10 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className='absolute right-4 bottom-18 z-50 w-[320px] rounded-lg border border-neutral-800 bg-black/30 shadow-lg backdrop-blur-md'
+              className='absolute right-4 bottom-18 z-50 w-[320px]'
             >
-              <div className='flex justify-end border-b border-neutral-800 p-1'>
+              <div className='flex justify-end'>
                 <Button
                   size='icon'
                   variant='icon'

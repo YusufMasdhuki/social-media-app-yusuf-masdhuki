@@ -1,11 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { useGetMe } from '@/hooks/my-profile/useGetMe';
 import { formatTime } from '@/lib/format-time';
+import { useProfileNavigation } from '@/lib/useProfileNavigation';
 import type { FeedAuthor } from '@/types/feed-type';
 
 interface PostHeaderProps {
@@ -18,22 +17,12 @@ export function PostHeader({ author, createdAt }: PostHeaderProps) {
     author.avatarUrl || '/images/default-avatar.png'
   );
 
-  const router = useRouter();
-  const { data: meData } = useGetMe();
-
-  const handleProfileClick = () => {
-    // kalau user yang sedang login
-    if (meData?.data.profile.username === author.username) {
-      router.push('/myProfile');
-    } else {
-      router.push(`/friendsProfile/${author.username}`);
-    }
-  };
+  const { handleProfileClick } = useProfileNavigation();
 
   return (
     <div
       className='group flex cursor-pointer items-center gap-2 md:gap-3'
-      onClick={handleProfileClick}
+      onClick={() => handleProfileClick(author.username)}
     >
       <Image
         src={avatarSrc}

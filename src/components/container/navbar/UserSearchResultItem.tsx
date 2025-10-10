@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 
+import { useProfileNavigation } from '@/lib/useProfileNavigation';
 import { cn } from '@/lib/utils';
 import type { UserSearchResult } from '@/types/user-search-type';
 
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export const UserSearchResultItem = ({ user, onClick }: Props) => {
-  const router = useRouter();
+  const { handleProfileClick } = useProfileNavigation();
 
   // Pastikan avatarSrc valid untuk Next.js Image
   const avatarSrc = user.avatarUrl
@@ -26,10 +26,8 @@ export const UserSearchResultItem = ({ user, onClick }: Props) => {
   return (
     <button
       onClick={() => {
-        onClick?.(); // ✅ tutup dropdown jika ada
-        setTimeout(() => {
-          router.push(`/friendsProfile/${user.username}`);
-        }, 50);
+        onClick?.();
+        setTimeout(() => handleProfileClick(user.username), 50);
       }}
       className={cn(
         'flex w-full cursor-pointer items-center gap-2 text-left transition-colors hover:bg-neutral-900'

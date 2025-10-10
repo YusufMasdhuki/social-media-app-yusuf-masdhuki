@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePostComments } from '@/hooks/comments/usePostComments';
 import { formatTime } from '@/lib/format-time';
 import { useIsMobile } from '@/lib/use-is-mobile';
+import { useProfileNavigation } from '@/lib/useProfileNavigation';
 
 import { CommentInput } from './CommentInput';
 import { CommentList } from './CommentList';
@@ -37,16 +38,21 @@ export function PostCommentsSection({
   const isMobile = useIsMobile();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
     usePostComments(post.id);
+  const { handleProfileClick } = useProfileNavigation();
 
   const allComments = data?.pages.flatMap((p) => p.data.comments) || [];
 
   return (
-    <div className='text-neutral-25 flex h-[calc(80vh-40px)] flex-1 flex-col bg-neutral-950 p-4 pr-0 md:h-[calc(90vh-40px)] md:p-5 md:pr-0'>
+    <div className='text-neutral-25 flex h-[calc(80vh-40px)] flex-1 flex-col bg-neutral-950 p-4 pr-0 max-md:pb-8 md:h-[calc(90vh-40px)] md:p-5 md:pr-0'>
       <h3 className='text-md block font-bold md:hidden'>Comments</h3>
       <ScrollArea className='h-full w-full overflow-y-auto'>
         {!isMobile && (
           <div className='mr-5 flex flex-col border-b border-neutral-800 pb-4'>
-            <div className='flex items-center gap-3 pb-3'>
+            {/* Author */}
+            <div
+              className='group flex max-w-max cursor-pointer items-center gap-3 pb-3 transition-all duration-300 ease-out'
+              onClick={() => handleProfileClick(post.author.username)}
+            >
               <Image
                 src={post.author.avatarUrl || '/images/default-avatar.png'}
                 alt={post.author.username}
@@ -55,7 +61,7 @@ export function PostCommentsSection({
                 className='h-10 w-10 rounded-full object-cover'
               />
               <div className='flex flex-col'>
-                <span className='text-sm font-bold'>
+                <span className='group-hover:text-primary-200 text-sm font-bold transition-all duration-300 ease-out'>
                   {post.author.username}
                 </span>
                 <span className='text-xs text-neutral-400'>
@@ -66,7 +72,7 @@ export function PostCommentsSection({
             <p className='text-sm text-neutral-300'>{post.caption}</p>
           </div>
         )}
-        <h3 className='text-md hidden font-bold md:block'>Comments</h3>
+        <h3 className='text-md hidden pt-4 font-bold md:block'>Comments</h3>
 
         <CommentList
           comments={allComments}

@@ -135,6 +135,7 @@ export function PostActions({
             filled={isSaved(postId)}
             fillColor='#FDFDFD'
             strokeColor='#FDFDFD'
+            size={24}
           />
         </Button>
       </div>

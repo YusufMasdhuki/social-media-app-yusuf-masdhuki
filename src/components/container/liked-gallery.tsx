@@ -2,12 +2,14 @@
 
 import { MessageCircle } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 import { useSavedPosts } from '@/hooks/saves/useSavedPosts';
 import { useInfiniteUserLikes } from '@/hooks/users/useInfiniteUserLikes';
 import { toFeedItem } from '@/lib/adapter';
+import { useIsMobile } from '@/lib/use-is-mobile';
 import type { FeedItem } from '@/types/feed-type';
 
 import Love from '../icons/love';
@@ -17,7 +19,8 @@ const LikedGallery = ({ username }: { username: string }) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteUserLikes(username, 12);
   const { toggle } = useSavedPosts();
-
+  const isMobile = useIsMobile();
+  const router = useRouter();
   const { ref, inView } = useInView({ threshold: 1 });
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
 
@@ -78,7 +81,13 @@ const LikedGallery = ({ username }: { username: string }) => {
           <div
             key={post.id}
             className='group relative aspect-square cursor-pointer overflow-hidden rounded-md'
-            onClick={() => setSelectedPostId(post.id)}
+            onClick={() => {
+              if (isMobile) {
+                router.push(`/post/${post.id}`); // 📱 Mobile → navigate
+              } else {
+                setSelectedPostId(post.id); // 💻 Desktop → open dialog
+              }
+            }}
           >
             <Image
               src={post.imageUrl || '/images/no-image.png'}
@@ -122,7 +131,7 @@ const LikedGallery = ({ username }: { username: string }) => {
       </div>
 
       {/* Post Comments Dialog */}
-      {selectedPost && (
+      {!isMobile && selectedPost && (
         <PostCommentsDialog
           post={selectedPost}
           username={selectedPost.author.username}

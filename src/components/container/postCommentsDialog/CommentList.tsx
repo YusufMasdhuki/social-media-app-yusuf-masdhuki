@@ -29,9 +29,12 @@ export function CommentList({
   }
 
   return (
-    <div className='space-y-4 pt-5 pr-5'>
+    <div className='mr-5 flex min-h-[200px] flex-col divide-y divide-neutral-900'>
       {comments.length === 0 && !isFetching && (
-        <p className='text-center text-neutral-500'>No comments yet</p>
+        <div className='flex flex-1 flex-col items-center justify-center gap-1 py-10 text-center'>
+          <p className='text-md text-neutral-25 font-bold'>No Comments yet</p>
+          <p className='text-sm text-neutral-400'>Start the conversation</p>
+        </div>
       )}
 
       {comments.map((comment) => (

@@ -221,6 +221,9 @@
     @apply bg-black text-white;
     font-family: var(--font-sf-text);
   }
+  .transition-base {
+    @apply transition-all duration-300 ease-out;
+  }
 }
 
 img {
