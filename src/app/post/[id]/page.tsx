@@ -48,7 +48,7 @@ function PostDetailPage() {
           variant='ghost'
           size='sm'
           onClick={() => router.back()}
-          className='text-neutral-25 flex items-center gap-2 hover:text-white'
+          className='text-neutral-25 flex items-center gap-2 bg-transparent hover:text-white'
         >
           <ArrowLeft className='h-4 w-4' />
           <span>Back</span>

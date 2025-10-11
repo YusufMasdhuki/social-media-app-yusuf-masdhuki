@@ -21,7 +21,7 @@ export function PostHeader({ author, createdAt }: PostHeaderProps) {
 
   return (
     <div
-      className='group flex cursor-pointer items-center gap-2 md:gap-3'
+      className='group flex max-w-max cursor-pointer items-center gap-2 md:gap-3'
       onClick={() => handleProfileClick(author.username)}
     >
       <Image

@@ -47,12 +47,17 @@ const MyProfile = () => {
           >
             Edit Profile
           </Button>
-          <Button className='size-10 md:size-12' variant='secondary'>
+          <Button
+            className='size-10 md:size-12'
+            size='icon'
+            variant='secondary'
+          >
             <Image
               src='/icons/share-icon.svg'
               alt='share'
               width={24}
               height={24}
+              className='size-5 md:size-6'
             />
           </Button>
         </div>

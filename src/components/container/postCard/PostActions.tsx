@@ -144,7 +144,7 @@ export function PostActions({
         <PostLikesDialog
           postId={postId}
           trigger={
-            <div className='hover:text-primary-200 max-w-max cursor-pointer justify-start px-0 text-sm font-medium transition-all duration-300 ease-out'>
+            <div className='hover:text-primary-200 max-w-max cursor-pointer justify-start px-0 text-xs font-medium transition-all duration-300 ease-out md:text-sm'>
               {likeNames}
             </div>
           }

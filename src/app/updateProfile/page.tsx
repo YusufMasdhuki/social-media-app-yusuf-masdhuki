@@ -1,77 +1,41 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import clsx from 'clsx';
 import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
 
 import { FormField } from '@/components/container/FormField';
+import { useUpdateProfileForm } from '@/components/pages/updateProfilePage/useUpdateProfileForm';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
-import { useGetMe, useUpdateMe } from '@/hooks/my-profile/useGetMe';
-import {
-  UpdateProfileFormValues,
-  updateProfileSchema,
-} from '@/schemas/updateProfileSchema';
-
-const UpdateProfile = () => {
-  const { data } = useGetMe();
-  const { mutate: updateProfile, isPending } = useUpdateMe();
-
-  const [preview, setPreview] = useState<string | null>(null);
-
-  // ✅ 3. Setup form react-hook-form + zod
+const UpdateProfilePage = () => {
   const {
+    data,
     control,
+    errors,
+    preview,
+    isPending,
+    handleFileChange,
     handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<UpdateProfileFormValues>({
-    resolver: zodResolver(updateProfileSchema),
-    defaultValues: {
-      name: data?.data.profile.name ?? '',
-      username: data?.data.profile.username ?? '',
-      phone: data?.data.profile.phone ?? '',
-      bio: data?.data.profile.bio ?? '',
-      avatarUrl: null,
-    },
-  });
-
-  // ✅ 4. Handle submit
-  const onSubmit = (values: UpdateProfileFormValues) => {
-    updateProfile({
-      name: values.name,
-      username: values.username,
-      phone: values.phone || undefined,
-      bio: values.bio ?? null,
-      avatarUrl: values.avatarUrl instanceof File ? values.avatarUrl : null,
-    });
-  };
-
-  // ✅ 5. Handle change photo
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setValue('avatarUrl', file);
-      const imageUrl = URL.createObjectURL(file);
-      setPreview(imageUrl);
-    }
-  };
+    onSubmit,
+  } = useUpdateProfileForm();
 
   if (!data) return null;
 
   const { profile } = data.data;
 
   return (
-    <div className='mx-auto w-full max-w-208 px-4 py-32'>
+    <div className='text-neutral-25 mx-auto w-full max-w-208 px-4 py-20 md:py-32'>
       {/* Header */}
-      <div className='mb-8 flex items-center gap-3'>
+      <div className='mb-4 flex items-center gap-2 md:mb-8 md:gap-3'>
         <Link href='/myProfile'>
-          <ArrowLeft className='size-8' />
+          <ArrowLeft className='size-6 md:size-8' />
         </Link>
-        <h1 className='text-display-xs font-bold'>Edit Profile</h1>
+        <h1 className='text-md md:text-display-xs font-bold'>Edit Profile</h1>
       </div>
 
       <form
@@ -80,32 +44,37 @@ const UpdateProfile = () => {
         encType='multipart/form-data'
       >
         {/* Avatar */}
-        <div className='flex items-center justify-between gap-12'>
+        <div className='flex flex-col items-start gap-4 max-md:items-center md:flex-row md:justify-between md:gap-12'>
           <div className='flex flex-col items-center gap-4'>
             <Image
               src={preview || profile.avatarUrl || '/images/default-avatar.png'}
               alt='avatar'
               width={130}
               height={130}
-              className='aspect-square size-32.5 rounded-full object-cover'
+              className='aspect-square size-20 rounded-full object-cover md:size-32.5'
             />
-            <label htmlFor='avatar' className='cursor-pointer'>
+            <Label htmlFor='avatar' className='cursor-pointer'>
               <Button
                 type='button'
-                className='px-6'
+                className='h-10 px-6 md:h-12'
                 variant='secondary'
                 asChild
               >
                 <span>Change Photo</span>
               </Button>
-              <input
+              <Input
                 id='avatar'
                 type='file'
                 accept='image/*'
                 className='hidden'
                 onChange={handleFileChange}
               />
-            </label>
+            </Label>
+            {errors.avatarUrl?.message && (
+              <p className='text-accent-red text-sm'>
+                {String(errors.avatarUrl.message)}
+              </p>
+            )}
           </div>
 
           <div className='flex-1 space-y-5'>
@@ -133,29 +102,34 @@ const UpdateProfile = () => {
               name='phone'
               error={errors.phone?.message}
             />
-            <FormField
-              id='bio'
-              label='Bio'
-              placeholder='Your bio'
-              control={control}
-              name='bio'
-              error={errors.bio?.message}
-            />
-          </div>
-        </div>
 
-        <div className='flex justify-end'>
-          <Button
-            type='submit'
-            disabled={isPending}
-            className='text-md px-10 py-3 font-semibold'
-          >
-            {isPending ? 'Saving...' : 'Save Changes'}
-          </Button>
+            <div className='flex flex-col gap-1.5'>
+              <Label htmlFor='bio' className='text-sm font-bold'>
+                Bio
+              </Label>
+              <Textarea
+                id='bio'
+                {...control.register('bio')}
+                placeholder='Your bio'
+                className={clsx(
+                  'min-h-24 rounded-xl border border-neutral-900 bg-neutral-950 p-2',
+                  errors.bio &&
+                    'border-accent-red focus-visible:ring-accent-red'
+                )}
+              />
+              {errors.bio && (
+                <p className='text-accent-red text-sm'>{errors.bio.message}</p>
+              )}
+            </div>
+
+            <Button type='submit' disabled={isPending} className='w-full'>
+              {isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
         </div>
       </form>
     </div>
   );
 };
 
-export default UpdateProfile;
+export default UpdateProfilePage;

@@ -86,12 +86,17 @@ const FriendsProfilePage = () => {
           </Button>
 
           {/* Share button */}
-          <Button className='size-12' variant='secondary'>
+          <Button
+            size='icon'
+            className='size-10 md:size-12'
+            variant='secondary'
+          >
             <Image
               src='/icons/share-icon.svg'
               alt='share'
               width={24}
               height={24}
+              className='size-5 md:size-6'
             />
           </Button>
         </div>

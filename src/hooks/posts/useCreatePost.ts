@@ -23,13 +23,13 @@ export const useCreatePost = () => {
     mutationFn: (payload) => createPost(payload),
 
     onSuccess: () => {
-      successToast('✅ Post berhasil dibuat!');
+      successToast('Post created successfully!');
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       setTimeout(() => router.replace('/'), 800);
     },
 
     onError: (error) => {
-      errorToast(error.message || 'Gagal membuat post.');
+      errorToast(error.message || 'Failed to create post.');
     },
   });
 };
