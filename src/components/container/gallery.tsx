@@ -118,7 +118,7 @@ const Gallery = ({ username }: { username: string }) => {
               <div className='flex items-center gap-4 text-white'>
                 <div className='flex items-center gap-1'>
                   <Love
-                    filled={post.likedByMe}
+                    filled
                     fillColor='white'
                     className='h-5 w-5 fill-white'
                   />

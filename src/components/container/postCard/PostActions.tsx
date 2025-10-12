@@ -93,7 +93,12 @@ export function PostActions({
     <div className={clsx('flex flex-col', className)}>
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-3 md:gap-4'>
-          <Button size='icon' variant='icon' onClick={handleToggleLike}>
+          <Button
+            size='icon'
+            variant='icon'
+            onClick={handleToggleLike}
+            className='gap-1.5'
+          >
             <Love
               filled={likedByMe}
               fillColor='#B41759'
